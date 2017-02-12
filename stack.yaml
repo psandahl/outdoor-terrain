@@ -1,0 +1,11 @@
+resolver: nightly-2017-02-11
+
+packages:
+- '.'
+- '../light-weight-opengl'
+
+extra-deps: []
+
+flags: {}
+
+extra-package-dbs: []
