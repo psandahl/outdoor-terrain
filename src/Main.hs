@@ -13,8 +13,8 @@ import           RenderLoop       (renderLoop)
 import           Graphics.LWGL    (BufferTarget (..), BufferUsage (..),
                                    ClearBufferMask (..), ComponentCount (..),
                                    GLfloat, Location (..), PrimitiveType (..),
-                                   Program, ShaderType (..),
-                                   VertexArrayObject (..),
+                                   Program, ShaderType (..), Texture,
+                                   TextureFormat (..), VertexArrayObject (..),
                                    VertexAttribPointerType (..))
 import qualified Graphics.LWGL    as GL
 
@@ -49,6 +49,16 @@ loadShaders xs = do
             GLFW.terminate
             exitFailure
 
+loadTexture :: FilePath -> IO Texture
+loadTexture file = do
+    eTexture <- GL.loadTexture2D file RGB8 False
+    case eTexture of
+        Right texture -> return texture
+        Left err -> do
+            putStrLn err
+            GLFW.terminate
+            exitFailure
+
 vertices :: [V3 GLfloat]
 vertices =
     [ V3   0.5    0.5  0
@@ -63,6 +73,8 @@ initGraphics :: IO VertexArrayObject
 initGraphics = do
     [vao] <- GL.glGenVertexArray 1
     GL.glBindVertexArray vao
+
+    texture <- loadTexture "textures/stones.jpg"
 
     [vbo] <- GL.glGenBuffers 1
     GL.glBindBuffer ArrayBuffer vbo
