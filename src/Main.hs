@@ -77,8 +77,6 @@ vertices =
 initGraphics :: IO VertexArrayObject
 initGraphics = do
     vao <- makeVertexArrayObject StaticDraw vertices
-    texture <- loadTexture "textures/stones.jpg"
-
     return vao
 
 main :: IO ()
@@ -91,6 +89,7 @@ main = do
                            , (FragmentShader, "shaders/lighted-box.frag")]
 
     vao <- initGraphics
+    texture <- loadTexture "textures/stones.jpg"
 
     GL.glClearColor 0 0 0.4 0
     renderLoop window $ \_ -> do
