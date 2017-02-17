@@ -1,22 +1,27 @@
 module Main where
 
-import           Control.Monad    (when)
-import           Data.Maybe       (fromJust, isNothing)
-import           Graphics.UI.GLFW (OpenGLProfile (..), StickyKeysInputMode (..),
-                                   Window, WindowHint (..))
-import qualified Graphics.UI.GLFW as GLFW
-import           Linear
-import           System.Exit      (exitFailure)
+import           Control.Monad              (when)
+import           Data.Maybe                 (fromJust, isNothing)
+import           Graphics.UI.GLFW           (OpenGLProfile (..),
+                                             StickyKeysInputMode (..), Window,
+                                             WindowHint (..))
+import qualified Graphics.UI.GLFW           as GLFW
+import           Linear                     (V2 (..), V3 (..))
+import           System.Exit                (exitFailure)
 
-import           RenderLoop       (renderLoop)
+import           RenderLoop                 (renderLoop)
 
-import           Graphics.LWGL    (BufferTarget (..), BufferUsage (..),
-                                   ClearBufferMask (..), ComponentCount (..),
-                                   GLfloat, Location (..), PrimitiveType (..),
-                                   Program, ShaderType (..), Texture,
-                                   TextureFormat (..), VertexArrayObject (..),
-                                   VertexAttribPointerType (..), VertexP (..))
-import qualified Graphics.LWGL    as GL
+import           Graphics.LWGL              (BufferTarget (..),
+                                             BufferUsage (..),
+                                             ClearBufferMask (..),
+                                             ComponentCount (..), GLfloat,
+                                             Location (..), PrimitiveType (..),
+                                             Program, ShaderType (..), Texture,
+                                             TextureFormat (..),
+                                             VertexArrayObject (..),
+                                             VertexAttribPointerType (..))
+import qualified Graphics.LWGL              as GL
+import           Graphics.LWGL.Vertex_P_Tex (Vertex (..), makeVertexArrayObject)
 
 createGLContext :: Int -> Int -> IO Window
 createGLContext width height = do
@@ -59,19 +64,19 @@ loadTexture file = do
             GLFW.terminate
             exitFailure
 
-vertices :: [VertexP]
+vertices :: [Vertex]
 vertices =
-    [ VertexP { position = V3   0.5    0.5  0 }
-    , VertexP { position = V3 (-0.5)   0.5  0 }
-    , VertexP { position = V3 (-0.5) (-0.5) 0 }
-    , VertexP { position = V3   0.5    0.5  0 }
-    , VertexP { position = V3 (-0.5) (-0.5) 0 }
-    , VertexP { position = V3   0.5  (-0.5) 0 }
+    [ Vertex { position = V3   0.5    0.5  0, texCoord = V2 1 1 }
+    , Vertex { position = V3 (-0.5)   0.5  0, texCoord = V2 0 1 }
+    , Vertex { position = V3 (-0.5) (-0.5) 0, texCoord = V2 0 0 }
+    , Vertex { position = V3   0.5    0.5  0, texCoord = V2 1 1 }
+    , Vertex { position = V3 (-0.5) (-0.5) 0, texCoord = V2 0 0 }
+    , Vertex { position = V3   0.5  (-0.5) 0, texCoord = V2 1 0 }
     ]
 
 initGraphics :: IO VertexArrayObject
 initGraphics = do
-    vao <- GL.makeVertexArrayObjectWithVertexP StaticDraw vertices
+    vao <- makeVertexArrayObject StaticDraw vertices
     texture <- loadTexture "textures/stones.jpg"
 
     return vao
