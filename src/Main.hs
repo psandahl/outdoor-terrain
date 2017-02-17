@@ -15,7 +15,7 @@ import           Graphics.LWGL    (BufferTarget (..), BufferUsage (..),
                                    GLfloat, Location (..), PrimitiveType (..),
                                    Program, ShaderType (..), Texture,
                                    TextureFormat (..), VertexArrayObject (..),
-                                   VertexAttribPointerType (..))
+                                   VertexAttribPointerType (..), VertexP (..))
 import qualified Graphics.LWGL    as GL
 
 createGLContext :: Int -> Int -> IO Window
@@ -59,29 +59,20 @@ loadTexture file = do
             GLFW.terminate
             exitFailure
 
-vertices :: [V3 GLfloat]
+vertices :: [VertexP]
 vertices =
-    [ V3   0.5    0.5  0
-    , V3 (-0.5)   0.5  0
-    , V3 (-0.5) (-0.5) 0
-    , V3   0.5    0.5  0
-    , V3 (-0.5) (-0.5) 0
-    , V3   0.5  (-0.5) 0
+    [ VertexP { position = V3   0.5    0.5  0 }
+    , VertexP { position = V3 (-0.5)   0.5  0 }
+    , VertexP { position = V3 (-0.5) (-0.5) 0 }
+    , VertexP { position = V3   0.5    0.5  0 }
+    , VertexP { position = V3 (-0.5) (-0.5) 0 }
+    , VertexP { position = V3   0.5  (-0.5) 0 }
     ]
 
 initGraphics :: IO VertexArrayObject
 initGraphics = do
-    [vao] <- GL.glGenVertexArray 1
-    GL.glBindVertexArray vao
-
+    vao <- GL.makeVertexArrayObjectWithVertexP StaticDraw vertices
     texture <- loadTexture "textures/stones.jpg"
-
-    [vbo] <- GL.glGenBuffers 1
-    GL.glBindBuffer ArrayBuffer vbo
-    GL.glBufferDataList ArrayBuffer vertices StaticDraw
-
-    GL.glEnableVertexAttribArray (Location 0)
-    GL.glVertexAttribPointer (Location 0) Three GLFloat False 0 0
 
     return vao
 
