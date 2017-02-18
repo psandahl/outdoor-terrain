@@ -11,15 +11,14 @@ import           System.Exit                (exitFailure)
 
 import           RenderLoop                 (renderLoop)
 
-import           Graphics.LWGL              (BufferTarget (..),
-                                             BufferUsage (..),
+import           Graphics.LWGL              (BufferUsage (..),
                                              ClearBufferMask (..),
-                                             ComponentCount (..), GLfloat,
-                                             Location (..), PrimitiveType (..),
-                                             Program, ShaderType (..), Texture,
+                                             PrimitiveType (..), Program,
+                                             ShaderType (..), Texture,
                                              TextureFormat (..),
-                                             VertexArrayObject (..),
-                                             VertexAttribPointerType (..))
+                                             TextureTarget (..),
+                                             TextureUnit (..),
+                                             VertexArrayObject (..))
 import qualified Graphics.LWGL              as GL
 import           Graphics.LWGL.Vertex_P_Tex (Vertex (..), makeVertexArrayObject)
 
@@ -96,6 +95,13 @@ main = do
         GL.glClear [ColorBuffer]
 
         GL.glUseProgram program
+
+        GL.glActiveTexture $ TextureUnit 0
+        GL.glBindTexture Texture2D texture
+
+        texLoc <- GL.glGetUniformLocation program "tex1"
+        GL.glUniform1i texLoc 0
+
         GL.glBindVertexArray vao
         GL.glDrawArrays Triangles 0 6
 
