@@ -17,10 +17,9 @@ import           Graphics.LWGL.Vertex_P_Tex
 
 data Entity = Entity
     { program  :: !Program
-    , vao      :: !VertexArrayObject
+    , mesh     :: !Mesh
     , animate  :: (Entity -> IO Entity)
     , textures :: ![(Texture, TextureTarget, Location)]
-    , elements :: !Int
     }
 
 --data EntityFactory = EntityFactory
@@ -44,29 +43,28 @@ makeFloor = runEitherT $ do
         left err
     let Right texture = eTexture
 
-    vao' <- liftIO $ makeVertexArrayObject StaticDraw floorVertices
+    mesh' <- liftIO $ buildFromList StaticDraw floorVertices
     texLoc <- liftIO $ glGetUniformLocation prog "tex1"
 
     right Entity
         { program = prog
-        , vao = vao'
+        , mesh = mesh'
         , animate = \e -> return e
         , textures = [(texture, Texture2D, texLoc)]
-        , elements = length floorVertices
         }
 
 
 render :: Entity -> IO ()
 render entity = do
     glUseProgram $ program entity
-    glBindVertexArray $ vao entity
+    glBindVertexArray (vao $ mesh entity)
 
     forM_ (zip (textures entity) [0 ..]) $ \((tex, targ, loc), unit) -> do
         glActiveTexture $ TextureUnit (fromIntegral unit)
         glBindTexture targ tex
         glUniform1i loc unit
 
-    glDrawArrays Triangles 0 $ elements entity
+    glDrawArrays Triangles 0 (numVertices $ mesh entity)
 
     glBindVertexArray (VertexArrayObject 0)
 
