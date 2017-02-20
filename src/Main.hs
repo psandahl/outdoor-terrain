@@ -8,7 +8,8 @@ import           Graphics.UI.GLFW (OpenGLProfile (..), StickyKeysInputMode (..),
 import qualified Graphics.UI.GLFW as GLFW
 import           System.Exit      (exitFailure)
 
-import           Graphics.LWGL    (ClearBufferMask (..), glClear, glClearColor)
+import           Graphics.LWGL    (ClearBufferMask (..), EnableCapability (..),
+                                   glClear, glClearColor, glEnable)
 import           RenderLoop       (renderLoop)
 import           Terrain
 
@@ -50,11 +51,13 @@ main = do
     terrain <- addPatch terrain0 <$> newPatch
 
     glClearColor 0 0 0.4 0
+    glEnable DepthTest
+
     renderLoop window $ renderFrame terrain
 
     GLFW.terminate
 
 renderFrame :: Terrain -> Window -> IO ()
 renderFrame terrain _ = do
-    glClear [ColorBuffer]
+    glClear [ColorBuffer, DepthBuffer]
     render terrain
