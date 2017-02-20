@@ -6,12 +6,11 @@ import           Data.Maybe       (fromJust, isNothing)
 import           Graphics.UI.GLFW (OpenGLProfile (..), StickyKeysInputMode (..),
                                    Window, WindowHint (..))
 import qualified Graphics.UI.GLFW as GLFW
-import           Linear           (V2 (..), V3 (..))
 import           System.Exit      (exitFailure)
 
-import           Entity
 import           Graphics.LWGL    (ClearBufferMask (..), glClear, glClearColor)
 import           RenderLoop       (renderLoop)
+import           Terrain
 
 createGLContext :: Int -> Int -> IO Window
 createGLContext width height = do
@@ -40,21 +39,22 @@ main = do
     GLFW.makeContextCurrent (Just window)
     GLFW.setStickyKeysInputMode window StickyKeysInputMode'Enabled
 
-    eEntity <- makeFloor
-    when (isLeft eEntity) $ do
-        let Left err = eEntity
+    eTerrain <- initTerrain
+    when (isLeft eTerrain) $ do
+        let Left err = eTerrain
         putStrLn err
         GLFW.terminate
         exitFailure
 
-    let Right entity = eEntity
+    let Right terrain0 = eTerrain
+    terrain <- addPatch terrain0 <$> newPatch
 
     glClearColor 0 0 0.4 0
-    renderLoop window $ renderFrame entity
+    renderLoop window $ renderFrame terrain
 
     GLFW.terminate
 
-renderFrame :: Entity -> Window -> IO ()
-renderFrame entity _ = do
+renderFrame :: Terrain -> Window -> IO ()
+renderFrame terrain _ = do
     glClear [ColorBuffer]
-    render entity
+    render terrain
