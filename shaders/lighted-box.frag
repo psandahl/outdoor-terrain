@@ -8,5 +8,6 @@ out vec4 color;
 
 void main()
 {
-  color = texture(tex1, vTexCoord);
+  // Flip the texture horizontally.
+  color = texture(tex1, vec2(vTexCoord.s, 1.0 - vTexCoord.t));
 }
