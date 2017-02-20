@@ -31,9 +31,8 @@ initTerrain = do
     case eProgram of
         Right prog -> do
             eTextures <-
-                sequence <$> mapM (\path ->
-                    loadTexture2D path RGB8 False
-                ) ["textures/grass.jpg"]
+                sequence <$> mapM (loadTexture2D RGB8 False)
+                    ["textures/grass.jpg"]
             case eTextures of
                 Right ts -> do
                     locations <-
