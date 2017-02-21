@@ -59,6 +59,8 @@ addPatch terrain patch =
 render :: Terrain -> IO ()
 render terrain = do
     glUseProgram $ program terrain
+    glEnable CullFace
+    glCullFace Back
 
     forM_ (zip3 [0 ..]
                 (textures terrain)
