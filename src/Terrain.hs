@@ -10,27 +10,28 @@ module Terrain
 import           Control.Monad              (forM_)
 import           Graphics.LWGL              (BufferUsage (..),
                                              CullFaceMode (..),
-                                             EnableCapability (..), GLuint,
-                                             Location, Mesh (..), Program,
-                                             ShaderType (..), Texture,
+                                             EnableCapability (..), GLfloat,
+                                             GLuint, Location, Mesh (..),
+                                             Program, ShaderType (..), Texture,
                                              TextureFormat (..),
                                              TextureTarget (..),
                                              TextureUnit (..),
                                              VertexArrayObject (..))
 import qualified Graphics.LWGL              as GL
 import           Graphics.LWGL.Vertex_P_Tex (Vertex (..))
-import           Linear                     (V2 (..), V3 (..))
+import           Linear                     (M44, V2 (..), V3 (..), (!*!))
 
 data Terrain = Terrain
     { program          :: !Program
     , textures         :: ![Texture]
     , textureLocations :: ![Location]
+    , mvpLocation      :: !Location
     , patches          :: ![Patch]
-    }
+    } deriving Show
 
 data Patch = Patch
     { mesh :: !Mesh
-    }
+    } deriving Show
 
 initTerrain :: IO (Either String Terrain)
 initTerrain = do
@@ -44,14 +45,17 @@ initTerrain = do
                     ["textures/grass.jpg"]
             case eTextures of
                 Right ts -> do
-                    locations <-
+                    textureLocations' <-
                         mapM (GL.glGetUniformLocation prog)
                             ["grassTexture"]
+
+                    mvpLocation' <- GL.glGetUniformLocation prog "mvp"
 
                     return $ Right Terrain
                         { program = prog
                         , textures = ts
-                        , textureLocations = locations
+                        , textureLocations = textureLocations'
+                        , mvpLocation = mvpLocation'
                         , patches = []
                         }
                 Left err -> return $ Left err
@@ -65,11 +69,14 @@ addPatch :: Terrain -> Patch -> Terrain
 addPatch terrain patch =
     terrain { patches = patch : patches terrain }
 
-render :: Terrain -> IO ()
-render terrain = do
+render :: M44 GLfloat -> M44 GLfloat -> Terrain -> IO ()
+render perspective view terrain = do
     GL.glUseProgram $ program terrain
     GL.glEnable CullFace
     GL.glCullFace Back
+
+    let mvp = perspective !*! view
+    GL.setMatrix4 (mvpLocation terrain) mvp
 
     forM_ (zip3 [0 ..]
                 (textures terrain)

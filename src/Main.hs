@@ -2,19 +2,27 @@ module Main where
 
 import           Control.Monad    (when)
 import           Data.Either      (isLeft)
+import           Data.IORef       (IORef, newIORef, readIORef, writeIORef)
 import           Data.Maybe       (fromJust, isNothing)
+import           Graphics.LWGL    (ClearBufferMask (..), EnableCapability (..),
+                                   GLfloat, glClear, glClearColor, glEnable)
 import           Graphics.UI.GLFW (OpenGLProfile (..), StickyKeysInputMode (..),
                                    Window, WindowHint (..))
 import qualified Graphics.UI.GLFW as GLFW
+import           Linear
 import           System.Exit      (exitFailure)
 
-import           Graphics.LWGL    (ClearBufferMask (..), EnableCapability (..),
-                                   glClear, glClearColor, glEnable)
 import           RenderLoop       (renderLoop)
 import           Terrain
 
-createGLContext :: Int -> Int -> IO Window
-createGLContext width height = do
+data RenderState = RenderState
+    { terrain      :: !Terrain
+    , perspectiveM :: !(M44 GLfloat)
+    , viewM        :: !(M44 GLfloat)
+    } deriving Show
+
+createGLContext :: IO Window
+createGLContext = do
     initSuccess <- GLFW.init
     when (not initSuccess) $ do
         putStrLn "GLFW initialization failed"
@@ -36,7 +44,7 @@ createGLContext width height = do
 
 main :: IO ()
 main = do
-    window <- createGLContext 1024 768
+    window <- createGLContext
     GLFW.makeContextCurrent (Just window)
     GLFW.setStickyKeysInputMode window StickyKeysInputMode'Enabled
 
@@ -48,16 +56,36 @@ main = do
         exitFailure
 
     let Right terrain0 = eTerrain
-    terrain <- addPatch terrain0 <$> newPatch
+    terrain1 <- addPatch terrain0 <$> newPatch
+
+    let renderState =
+          RenderState
+            { terrain = terrain1
+            , perspectiveM = perspective (degToRad 45)
+                                         ( fromIntegral width / fromIntegral height )
+                                         0.001 10000
+            , viewM = lookAt (V3 0 0 5) (V3 0 0 0) (V3 0 1 0)
+            }
+
+    ref <- newIORef renderState
 
     glClearColor 0 0 0.4 0
     glEnable DepthTest
-
-    renderLoop window $ renderFrame terrain
+    renderLoop window $ renderScene ref
 
     GLFW.terminate
 
-renderFrame :: Terrain -> Window -> IO ()
-renderFrame terrain _ = do
+renderScene :: IORef RenderState -> Window -> IO ()
+renderScene ref _ = do
+    renderState <- readIORef ref
     glClear [ColorBuffer, DepthBuffer]
-    render terrain
+    render (perspectiveM renderState) (viewM renderState) (terrain renderState)
+
+width :: Int
+width = 1024
+
+height :: Int
+height = 768
+
+degToRad :: Float -> Float
+degToRad deg = deg * (pi / 180)
