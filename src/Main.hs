@@ -12,7 +12,7 @@ import qualified Graphics.UI.GLFW as GLFW
 import           Linear
 import           System.Exit      (exitFailure)
 
-import           RenderLoop       (renderLoop)
+import           EventLoop        (eventLoop)
 import           Terrain
 
 data RenderState = RenderState
@@ -32,6 +32,7 @@ createGLContext = do
     GLFW.windowHint $ WindowHint'ContextVersionMajor 3
     GLFW.windowHint $ WindowHint'ContextVersionMinor 3
     GLFW.windowHint $ WindowHint'OpenGLForwardCompat True
+    --GLFW.windowHint $ WindowHint'OpenGLDebugContext True
     GLFW.windowHint $ WindowHint'OpenGLProfile OpenGLProfile'Core
 
     window <- GLFW.createWindow width height "Outdoor terrain" Nothing Nothing
@@ -71,12 +72,12 @@ main = do
 
     glClearColor 0 0 0.4 0
     glEnable DepthTest
-    renderLoop window $ renderScene ref
+    eventLoop window $ renderScene ref
 
     GLFW.terminate
 
-renderScene :: IORef RenderState -> Window -> IO ()
-renderScene ref _ = do
+renderScene :: IORef RenderState -> IO ()
+renderScene ref = do
     renderState <- readIORef ref
     glClear [ColorBuffer, DepthBuffer]
     render (perspectiveM renderState) (viewM renderState) (terrain renderState)

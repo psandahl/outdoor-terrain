@@ -1,20 +1,20 @@
-module RenderLoop
-    ( renderLoop
+module EventLoop
+    ( eventLoop
     ) where
 
 import           Graphics.UI.GLFW (Key (..), KeyState (..), Window, getKey,
                                    pollEvents, swapBuffers, windowShouldClose)
 
--- | A simple rendering loop which repeats the provided action until ESC is
+-- | A simple rendering event loop which repeats the provided action until ESC is
 -- pressed or that a close event is created otherwise.
-renderLoop :: Window -> (Window -> IO ()) -> IO ()
-renderLoop window action = go
+eventLoop :: Window -> IO () -> IO ()
+eventLoop window action = go
     where
         go :: IO ()
         go = do
-            action window
-            swapBuffers window
             pollEvents
+            action
+            swapBuffers window
 
             escState <- getKey window Key'Escape
             shouldClose <- windowShouldClose window
