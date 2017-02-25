@@ -2,23 +2,29 @@ module Main where
 
 import           Control.Monad    (when)
 import           Data.Either      (isLeft)
-import           Data.IORef       (IORef, newIORef, readIORef, writeIORef)
+import           Data.IORef       (IORef, modifyIORef, newIORef, readIORef,
+                                   writeIORef)
 import           Data.Maybe       (fromJust, isNothing)
 import           Graphics.LWGL    (ClearBufferMask (..), EnableCapability (..),
                                    GLfloat, glClear, glClearColor, glEnable)
-import           Graphics.UI.GLFW (OpenGLProfile (..), StickyKeysInputMode (..),
+import           Graphics.UI.GLFW (Key (..), KeyState (..), ModifierKeys,
+                                   OpenGLProfile (..), StickyKeysInputMode (..),
                                    Window, WindowHint (..))
 import qualified Graphics.UI.GLFW as GLFW
 import           Linear
 import           System.Exit      (exitFailure)
 
+import           Camera           (Camera (matrix), Navigation (..), animate,
+                                   initCamera, initNavigation)
 import           EventLoop        (eventLoop)
 import           Terrain
 
 data RenderState = RenderState
     { terrain      :: !Terrain
     , perspectiveM :: !(M44 GLfloat)
-    , viewM        :: !(M44 GLfloat)
+    , camera       :: !Camera
+    , navigation   :: !Navigation
+    , lastTime     :: !Double
     } deriving Show
 
 createGLContext :: IO Window
@@ -59,16 +65,22 @@ main = do
     let Right terrain0 = eTerrain
     terrain1 <- addPatch terrain0 <$> newPatch
 
+    Just now <- GLFW.getTime
+
     let renderState =
           RenderState
             { terrain = terrain1
             , perspectiveM = perspective (degToRad 45)
                                          ( fromIntegral width / fromIntegral height )
                                          0.001 10000
-            , viewM = lookAt (V3 0 0 5) (V3 0 0 0) (V3 0 1 0)
+            , camera = initCamera (V3 0 0 5) 0
+            , navigation = initNavigation
+            , lastTime = now
             }
 
     ref <- newIORef renderState
+
+    GLFW.setKeyCallback window $ Just (keyCallback ref)
 
     glClearColor 0 0 0.4 0
     glEnable DepthTest
@@ -76,11 +88,55 @@ main = do
 
     GLFW.terminate
 
+keyCallback :: IORef RenderState -> Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
+keyCallback ref _ key _ keyState _ = do
+    putStrLn $ show key ++ " : " ++ show keyState
+    case key of
+        Key'Up    -> modifyIORef ref $ setForward (isActive keyState)
+        Key'Down  -> modifyIORef ref $ setBackward (isActive keyState)
+        Key'Left  -> modifyIORef ref $ setLeft (isActive keyState)
+        Key'Right -> modifyIORef ref $ setRight (isActive keyState)
+        _         -> return ()
+
+isActive :: KeyState -> Bool
+isActive KeyState'Released = False
+isActive _                 = True
+
+setForward :: Bool -> RenderState -> RenderState
+setForward val renderState =
+    let nav  = navigation renderState
+    in renderState { navigation = nav { forward = val } }
+
+setBackward :: Bool -> RenderState -> RenderState
+setBackward val renderState =
+    let nav  = navigation renderState
+    in renderState { navigation = nav { backward = val } }
+
+setLeft :: Bool -> RenderState -> RenderState
+setLeft val renderState =
+    let nav  = navigation renderState
+    in renderState { navigation = nav { left = val } }
+
+setRight :: Bool -> RenderState -> RenderState
+setRight val renderState =
+    let nav  = navigation renderState
+    in renderState { navigation = nav { right = val } }
+
 renderScene :: IORef RenderState -> IO ()
 renderScene ref = do
     renderState <- readIORef ref
+
+    Just now <- GLFW.getTime
+
+    let duration = now - lastTime renderState
+        camera'  = animate (navigation renderState) duration (camera renderState)
+        view     = matrix camera'
+
+    -- The updated camera and the new timestamp must be written to the state.
+    writeIORef ref renderState { camera = camera', lastTime = now }
+
     glClear [ColorBuffer, DepthBuffer]
-    render (perspectiveM renderState) (viewM renderState) (terrain renderState)
+    render (perspectiveM renderState) view (terrain renderState)
 
 width :: Int
 width = 1024
