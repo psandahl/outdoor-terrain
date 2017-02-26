@@ -23,6 +23,8 @@ data Navigation = Navigation
     , backward :: !Bool
     , left     :: !Bool
     , right    :: !Bool
+    , up       :: !Bool
+    , down     :: !Bool
     } deriving Show
 
 initCamera :: V3 GLfloat -> GLfloat -> Camera
@@ -42,6 +44,8 @@ initNavigation =
         , backward = False
         , left = False
         , right = False
+        , up = False
+        , down = False
         }
 
 animate :: Navigation -> Double -> Camera -> Camera
@@ -50,6 +54,8 @@ animate navigation durationD camera =
         theta = duration * rotateSpeed * fullCircle
         animation = goBackward duration    $
                         goForward duration $
+                        goUp duration      $
+                        goDown duration    $
                         turnRight theta    $
                         turnLeft theta camera
     in animation { matrix = makeViewMatrix animation }
@@ -72,6 +78,22 @@ animate navigation durationD camera =
                     in cam { yRotation = yRotation'
                            , direction = makeDirection yRotation'
                            }
+                else cam
+
+        goDown :: GLfloat -> Camera -> Camera
+        goDown duration cam =
+            if (up navigation)
+                then
+                    let stride = duration * moveSpeed *^ V3 0 1 0
+                    in cam { position = position cam + stride }
+                else cam
+
+        goUp :: GLfloat -> Camera -> Camera
+        goUp duration cam =
+            if (down navigation)
+                then
+                    let stride = duration * moveSpeed *^ V3 0 1 0
+                    in cam { position = position cam - stride }
                 else cam
 
         goForward :: GLfloat -> Camera -> Camera
@@ -108,7 +130,7 @@ moveSpeed :: GLfloat
 moveSpeed = 8 -- Units per second.
 
 rotateSpeed :: GLfloat
-rotateSpeed = 1 -- One full circle per second.
+rotateSpeed = 0.4 -- Circles per second.
 
 fullCircle :: GLfloat
 fullCircle = 2 * pi

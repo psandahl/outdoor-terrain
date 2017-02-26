@@ -90,13 +90,14 @@ main = do
     GLFW.terminate
 
 keyCallback :: IORef RenderState -> Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
-keyCallback ref _ key _ keyState _ = do
-    putStrLn $ show key ++ " : " ++ show keyState
+keyCallback ref _ key _ keyState _ =
     case key of
         Key'Up    -> modifyIORef ref $ setForward (isActive keyState)
         Key'Down  -> modifyIORef ref $ setBackward (isActive keyState)
         Key'Left  -> modifyIORef ref $ setLeft (isActive keyState)
         Key'Right -> modifyIORef ref $ setRight (isActive keyState)
+        Key'A     -> modifyIORef ref $ setUp (isActive keyState)
+        Key'Z     -> modifyIORef ref $ setDown (isActive keyState)
         _         -> return ()
 
 isActive :: KeyState -> Bool
@@ -122,6 +123,16 @@ setRight :: Bool -> RenderState -> RenderState
 setRight val renderState =
     let nav  = navigation renderState
     in renderState { navigation = nav { right = val } }
+
+setDown :: Bool -> RenderState -> RenderState
+setDown val renderState =
+    let nav = navigation renderState
+    in renderState { navigation = nav { down = val } }
+
+setUp :: Bool -> RenderState -> RenderState
+setUp val renderState =
+    let nav = navigation renderState
+    in renderState { navigation = nav { up = val } }
 
 renderScene :: IORef RenderState -> IO ()
 renderScene ref = do
