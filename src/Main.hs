@@ -73,7 +73,7 @@ main = do
             , perspectiveM = perspective (degToRad 45)
                                          ( fromIntegral width / fromIntegral height )
                                          0.001 10000
-            , camera = initCamera (V3 0 10 0) (pi + pi / 4)
+            , camera = initCamera (V3 0 50 0) (pi + pi / 4)
             , navigation = initNavigation
             , lastTime = now
             }

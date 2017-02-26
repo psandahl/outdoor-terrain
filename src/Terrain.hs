@@ -4,16 +4,13 @@ module Terrain
     , render
     ) where
 
-import           Graphics.LWGL          (BufferUsage (..),
-                                         EnableCapability (..), GLfloat, GLuint,
-                                         Location, Mesh (..), PolygonFace (..),
-                                         Program, ShaderType (..),
-                                         VertexArrayObject (..))
-import qualified Graphics.LWGL          as GL
-import           Graphics.LWGL.Vertex_P (Vertex (..))
-import           Linear                 (M44, V3 (..), (!*!))
+import           Graphics.LWGL (EnableCapability (..), GLfloat, Location,
+                                Mesh (..), PolygonFace (..), Program,
+                                ShaderType (..), VertexArrayObject (..))
+import qualified Graphics.LWGL as GL
+import           Linear        (M44, (!*!))
 
-import           TerrainGen             (constHeight, makeTerrainMesh)
+import           TerrainGen    (makeTerrainMeshFromMap)
 
 data Terrain = Terrain
     { program     :: !Program
@@ -27,14 +24,20 @@ initTerrain = do
                                , (FragmentShader, "shaders/terrain.frag")
                                ]
     case eProgram of
+
         Right prog -> do
-            mvpLocation' <- GL.glGetUniformLocation prog "mvp"
-            mesh' <- makeTerrainMesh 128 128 (constHeight 0)
-            return $ Right Terrain
-                        { program = prog
-                        , mvpLocation = mvpLocation'
-                        , mesh = mesh'
-                        }
+            eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
+            case eMesh of
+
+                Right mesh' -> do
+                    mvpLocation' <- GL.glGetUniformLocation prog "mvp"
+                    return $ Right Terrain
+                                { program = prog
+                                , mvpLocation = mvpLocation'
+                                , mesh = mesh'
+                                }
+
+                Left err -> return $ Left err
 
         Left err -> return $ Left err
 

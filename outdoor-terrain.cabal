@@ -24,5 +24,6 @@ executable outdoor-terrain-exe
   ghc-options:         -Wall -O2
   build-depends:       base >= 4.7 && < 5
                      , GLFW-b
+                     , JuicyPixels
                      , light-weight-opengl
                      , linear
