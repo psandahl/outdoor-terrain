@@ -6,7 +6,8 @@ import           Data.IORef       (IORef, modifyIORef, newIORef, readIORef,
                                    writeIORef)
 import           Data.Maybe       (fromJust, isNothing)
 import           Graphics.LWGL    (ClearBufferMask (..), EnableCapability (..),
-                                   GLfloat, glClear, glClearColor, glEnable)
+                                   GLfloat, PolygonFace (..), PolygonMode (..))
+import qualified Graphics.LWGL    as GL
 import           Graphics.UI.GLFW (Key (..), KeyState (..), ModifierKeys,
                                    OpenGLProfile (..), StickyKeysInputMode (..),
                                    Window, WindowHint (..))
@@ -82,8 +83,9 @@ main = do
 
     GLFW.setKeyCallback window $ Just (keyCallback ref)
 
-    glClearColor 0 0 0.4 0
-    glEnable DepthTest
+    GL.glClearColor 0 0 0.4 0
+    GL.glEnable DepthTest
+    GL.glPolygonMode FrontAndBack Line
     eventLoop window $ renderScene ref
 
     GLFW.terminate
@@ -135,7 +137,7 @@ renderScene ref = do
     -- The updated camera and the new timestamp must be written to the state.
     writeIORef ref renderState { camera = camera', lastTime = now }
 
-    glClear [ColorBuffer, DepthBuffer]
+    GL.glClear [ColorBuffer, DepthBuffer]
     render (perspectiveM renderState) view (terrain renderState)
 
 width :: Int

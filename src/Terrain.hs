@@ -9,10 +9,10 @@ module Terrain
 
 import           Control.Monad              (forM_)
 import           Graphics.LWGL              (BufferUsage (..),
-                                             CullFaceMode (..),
                                              EnableCapability (..), GLfloat,
                                              GLuint, Location, Mesh (..),
-                                             Program, ShaderType (..), Texture,
+                                             PolygonFace (..), Program,
+                                             ShaderType (..), Texture,
                                              TextureFormat (..),
                                              TextureTarget (..),
                                              TextureUnit (..),
