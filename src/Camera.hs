@@ -105,7 +105,7 @@ north :: V3 GLfloat
 north = V3 0 0 (-1)
 
 moveSpeed :: GLfloat
-moveSpeed = 1 -- One unit length per second.
+moveSpeed = 8 -- Units per second.
 
 rotateSpeed :: GLfloat
 rotateSpeed = 1 -- One full circle per second.
