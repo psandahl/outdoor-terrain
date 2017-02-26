@@ -1,32 +1,24 @@
 module Terrain
     ( Terrain
-    , Patch
     , initTerrain
-    , newPatch
-    , addPatch
     , render
     ) where
 
-import           Control.Monad          (forM_)
 import           Graphics.LWGL          (BufferUsage (..),
                                          EnableCapability (..), GLfloat, GLuint,
                                          Location, Mesh (..), PolygonFace (..),
-                                         Program, ShaderType (..), Texture,
-                                         TextureFormat (..), TextureTarget (..),
-                                         TextureUnit (..),
+                                         Program, ShaderType (..),
                                          VertexArrayObject (..))
 import qualified Graphics.LWGL          as GL
 import           Graphics.LWGL.Vertex_P (Vertex (..))
-import           Linear                 (M44, V2 (..), V3 (..), (!*!))
+import           Linear                 (M44, V3 (..), (!*!))
+
+import           TerrainGen             (constHeight, makeTerrainMesh)
 
 data Terrain = Terrain
     { program     :: !Program
     , mvpLocation :: !Location
-    , patches     :: ![Patch]
-    } deriving Show
-
-data Patch = Patch
-    { mesh :: !Mesh
+    , mesh        :: !Mesh
     } deriving Show
 
 initTerrain :: IO (Either String Terrain)
@@ -37,20 +29,14 @@ initTerrain = do
     case eProgram of
         Right prog -> do
             mvpLocation' <- GL.glGetUniformLocation prog "mvp"
+            mesh' <- makeTerrainMesh 128 128 (constHeight 0)
             return $ Right Terrain
                         { program = prog
                         , mvpLocation = mvpLocation'
-                        , patches = []
+                        , mesh = mesh'
                         }
 
         Left err -> return $ Left err
-
-newPatch :: IO Patch
-newPatch = Patch <$> GL.buildFromList StaticDraw vertices indices'
-
-addPatch :: Terrain -> Patch -> Terrain
-addPatch terrain patch =
-    terrain { patches = patch : patches terrain }
 
 render :: M44 GLfloat -> M44 GLfloat -> Terrain -> IO ()
 render perspective view terrain = do
@@ -61,20 +47,7 @@ render perspective view terrain = do
     let mvp = perspective !*! view
     GL.setMatrix4 (mvpLocation terrain) mvp
 
-    forM_ (patches terrain) $ \patch -> do
-        GL.glBindVertexArray (vao $ mesh patch)
-        GL.drawTrianglesVector (indices $ mesh patch)
+    GL.glBindVertexArray (vao $ mesh terrain)
+    GL.drawTrianglesVector (indices $ mesh terrain)
 
     GL.glBindVertexArray (VertexArrayObject 0)
-
-vertices :: [Vertex]
-vertices =
-    [ Vertex { position = V3   0.5    0.5  0 }
-    , Vertex { position = V3 (-0.5)   0.5  0 }
-    , Vertex { position = V3 (-0.5) (-0.5) 0 }
-    , Vertex { position = V3   0.5  (-0.5) 0 }
-    ]
-
-indices' :: [GLuint]
-indices' =
-    [0, 1, 2, 0, 2, 3]

@@ -63,18 +63,17 @@ main = do
         GLFW.terminate
         exitFailure
 
-    let Right terrain0 = eTerrain
-    terrain1 <- addPatch terrain0 <$> newPatch
+    let Right terrain' = eTerrain
 
     Just now <- GLFW.getTime
 
     let renderState =
           RenderState
-            { terrain = terrain1
+            { terrain = terrain'
             , perspectiveM = perspective (degToRad 45)
                                          ( fromIntegral width / fromIntegral height )
                                          0.001 10000
-            , camera = initCamera (V3 0 0 5) 0
+            , camera = initCamera (V3 0 2 5) 0
             , navigation = initNavigation
             , lastTime = now
             }
