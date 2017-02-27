@@ -17,6 +17,7 @@ executable outdoor-terrain-exe
   hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       Camera
+                       DummyGen
                        EventLoop
                        Terrain
                        TerrainGen

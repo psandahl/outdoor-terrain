@@ -10,7 +10,8 @@ import           Graphics.LWGL (EnableCapability (..), GLfloat, Location,
 import qualified Graphics.LWGL as GL
 import           Linear        (M44, (!*!))
 
-import           TerrainGen    (makeTerrainMeshFromMap)
+import           DummyGen      (makeDummyMesh)
+--import           TerrainGen    (makeTerrainMeshFromMap)
 
 data Terrain = Terrain
     { program     :: !Program
@@ -26,7 +27,8 @@ initTerrain = do
     case eProgram of
 
         Right prog -> do
-            eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
+            --eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
+            eMesh <- Right <$> makeDummyMesh
             case eMesh of
 
                 Right mesh' -> do
