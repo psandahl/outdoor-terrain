@@ -6,7 +6,9 @@ module Terrain
 
 import           Graphics.LWGL (EnableCapability (..), GLfloat, Location,
                                 Mesh (..), PolygonFace (..), Program,
-                                ShaderType (..), VertexArrayObject (..))
+                                ShaderType (..), Texture, TextureFormat (..),
+                                TextureTarget (..), TextureUnit (..),
+                                VertexArrayObject (..))
 import qualified Graphics.LWGL as GL
 import           Linear        (M44, (!*!))
 
@@ -15,7 +17,9 @@ import           DummyGen      (makeDummyMesh)
 
 data Terrain = Terrain
     { program     :: !Program
+    , texture     :: !Texture
     , mvpLocation :: !Location
+    , texLocation :: !Location
     , mesh        :: !Mesh
     } deriving Show
 
@@ -27,17 +31,27 @@ initTerrain = do
     case eProgram of
 
         Right prog -> do
-            --eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
-            eMesh <- Right <$> makeDummyMesh
-            case eMesh of
 
-                Right mesh' -> do
-                    mvpLocation' <- GL.glGetUniformLocation prog "mvp"
-                    return $ Right Terrain
-                                { program = prog
-                                , mvpLocation = mvpLocation'
-                                , mesh = mesh'
-                                }
+            eTexture <- GL.loadTexture2D RGB8 False "textures/test.tga"
+            case eTexture of
+                Right texture' -> do
+
+                    --eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
+                    eMesh <- Right <$> makeDummyMesh
+                    case eMesh of
+
+                        Right mesh' -> do
+                            mvpLocation' <- GL.glGetUniformLocation prog "mvp"
+                            texLocation' <- GL.glGetUniformLocation prog "groundTexture"
+                            return $ Right Terrain
+                                      { program = prog
+                                      , texture = texture'
+                                      , mvpLocation = mvpLocation'
+                                      , texLocation = texLocation'
+                                      , mesh = mesh'
+                                      }
+
+                        Left err -> return $ Left err
 
                 Left err -> return $ Left err
 
@@ -53,6 +67,11 @@ render perspective view terrain = do
     GL.setMatrix4 (mvpLocation terrain) mvp
 
     GL.glBindVertexArray (vao $ mesh terrain)
+
+    GL.glActiveTexture $ TextureUnit 0
+    GL.glBindTexture Texture2D $ texture terrain
+    GL.glUniform1i (texLocation terrain) 0
+
     GL.drawTrianglesVector (indices $ mesh terrain)
 
     GL.glBindVertexArray (VertexArrayObject 0)

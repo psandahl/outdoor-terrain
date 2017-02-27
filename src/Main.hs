@@ -84,7 +84,7 @@ main = do
 
     GL.glClearColor 0 0 0.4 0
     GL.glEnable DepthTest
-    GL.glPolygonMode FrontAndBack Line
+    --GL.glPolygonMode FrontAndBack Line
     eventLoop window $ renderScene ref
 
     GLFW.terminate
