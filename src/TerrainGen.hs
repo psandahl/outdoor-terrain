@@ -6,16 +6,19 @@ module TerrainGen
     ) where
 
 import           Codec.Picture
+import           Data.Vector.Storable            (Vector)
+import qualified Data.Vector.Storable            as Vec
 import           Graphics.LWGL
 import           Graphics.LWGL.Vertex_P_Norm_Tex (Vertex (..))
 import           Linear                          (V2 (..), V3 (..))
+
 
 type HeightGen = Int -> Int -> GLfloat
 
 makeTerrainMesh :: Int -> Int -> HeightGen -> IO Mesh
 makeTerrainMesh rows cols height =
-    buildFromList StaticDraw (gridVertices rows cols height)
-                             (gridIndices (fromIntegral rows) (fromIntegral cols))
+    buildFromVector StaticDraw (gridVertices rows cols height)
+                               (gridIndices (fromIntegral rows) (fromIntegral cols))
 
 makeTerrainMeshFromMap :: FilePath -> IO (Either String Mesh)
 makeTerrainMeshFromMap file = do
@@ -27,9 +30,9 @@ makeTerrainMeshFromMap file = do
                                       (mapHeight img)
         Left err -> return $ Left err
 
-gridVertices :: Int -> Int -> HeightGen -> [Vertex]
+gridVertices :: Int -> Int -> HeightGen -> Vector Vertex
 gridVertices rows cols height =
-    concat $ for_ [0 .. rows - 1] $ \row ->
+    Vec.fromList $ concat $ for_ [0 .. rows - 1] $ \row ->
         for_ [0 .. cols - 1] $ \col ->
             Vertex
                 { position = V3 (fromIntegral col)
@@ -40,9 +43,9 @@ gridVertices rows cols height =
                                 (fromIntegral $ rows - (row + 1))
                 }
 
-gridIndices :: GLuint -> GLuint -> [GLuint]
+gridIndices :: GLuint -> GLuint -> Vector GLuint
 gridIndices rows cols =
-    concat $ for_ [0 .. rows - 2] $ \row ->
+    Vec.fromList $ concat $ for_ [0 .. rows - 2] $ \row ->
         concat $ for_ [0 .. cols - 2] $ \col ->
             let myIndex = col + (row * cols)
             in [ myIndex, myIndex + cols, myIndex + 1

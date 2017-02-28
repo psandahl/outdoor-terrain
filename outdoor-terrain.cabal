@@ -28,3 +28,4 @@ executable outdoor-terrain-exe
                      , JuicyPixels
                      , light-weight-opengl
                      , linear
+                     , vector
