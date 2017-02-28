@@ -14,6 +14,8 @@ out vec4 color;
 const float ambientStrength = 0.1;
 const float diffuseFactor = 0.4;
 
+const vec4 groundColor = vec4(0, 104.0 / 255.0, 10.0 / 255.0, 1);
+
 void main()
 {
   // Calculate ambient color.
@@ -31,7 +33,7 @@ void main()
   }
 
   // Load texture color. Flip the texture horizontally.
-  vec4 fragColor = texture(groundTexture, vec2(vTexCoord.s, 1.0 - vTexCoord.t));
+  vec4 fragColor = mix(groundColor, texture(groundTexture, vec2(vTexCoord.s, 1.0 - vTexCoord.t)), 0.9);
 
   color = fragColor + ambientColor + diffuseColor;
 }
