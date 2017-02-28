@@ -20,6 +20,7 @@ data Terrain = Terrain
     , model         :: !(M44 GLfloat)
     , texture       :: !Texture
     , mvpLocation   :: !Location
+    , modelLocation :: !Location
     , sunLocation   :: !Location
     , colorLocation :: !Location
     , texLocation   :: !Location
@@ -46,6 +47,7 @@ initTerrain = do
 
                         Right mesh' -> do
                             mvpLocation' <- GL.glGetUniformLocation prog "mvp"
+                            modelLocation' <- GL.glGetUniformLocation prog "model"
                             sunLocation' <- GL.glGetUniformLocation prog "sunPosition"
                             colorLocation' <- GL.glGetUniformLocation prog "sunColor"
                             texLocation' <- GL.glGetUniformLocation prog "groundTexture"
@@ -54,6 +56,7 @@ initTerrain = do
                                       , model = makeTranslate $ V3 (-128.5) 0 (-128.5)
                                       , texture = texture'
                                       , mvpLocation = mvpLocation'
+                                      , modelLocation = modelLocation'
                                       , sunLocation = sunLocation'
                                       , colorLocation = colorLocation'
                                       , texLocation = texLocation'
@@ -72,6 +75,7 @@ render perspective view sunLight terrain = do
 
     let mvp = perspective !*! view !*! model terrain
     GL.setMatrix4 (mvpLocation terrain) mvp
+    GL.setMatrix4 (modelLocation terrain) (model terrain)
 
     GL.setVector3 (sunLocation terrain) (sunPosition sunLight)
     GL.setVector3 (colorLocation terrain) (sunColor sunLight)
