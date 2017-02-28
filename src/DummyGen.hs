@@ -12,7 +12,7 @@ makeDummyMesh = GL.buildFromList StaticDraw vertices indices
 
 vertices :: [Vertex]
 vertices =
-    [ Vertex
+    [ Vertex -- Top row
         { position = V3 (-1) 0 0
         , texCoord = V2 0 1
         }
@@ -21,6 +21,10 @@ vertices =
         , texCoord = V2 1 1
         }
     , Vertex
+        { position = V3 1 0 0
+        , texCoord = V2 2 1
+        }
+    , Vertex -- Bottom row
         { position = V3 (-1) (-1) 0
         , texCoord = V2 0 0
         }
@@ -28,7 +32,13 @@ vertices =
         { position = V3 0 (-1) 0
         , texCoord = V2 1 0
         }
+    , Vertex
+        { position = V3 1 (-1) 0
+        , texCoord = V2 2 0
+        }
     ]
 
 indices :: [GLuint]
-indices = [0, 2, 1, 1, 2, 3]
+indices = [ 0, 3, 1, 1, 3, 4
+          , 1, 4, 2, 2, 4, 5
+          ]
