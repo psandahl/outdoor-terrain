@@ -14,6 +14,6 @@ data SunLight = SunLight
 initSun :: SunLight
 initSun =
     SunLight
-        { sunPosition = V3 0 100 0
+        { sunPosition = V3 0 100 (-200)
         , sunColor = V3 (255 / 255) (255 / 255) (251 / 255)
         }
