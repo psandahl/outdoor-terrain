@@ -10,16 +10,20 @@ import           Graphics.LWGL (EnableCapability (..), GLfloat, Location,
                                 TextureTarget (..), TextureUnit (..),
                                 VertexArrayObject (..))
 import qualified Graphics.LWGL as GL
-import           Linear        (M44, (!*!))
+import           Linear        (M44, V3 (..), V4 (..), (!*!))
 
+import           SunLight      (SunLight (..))
 import           TerrainGen    (makeTerrainMeshFromMap)
 
 data Terrain = Terrain
-    { program     :: !Program
-    , texture     :: !Texture
-    , mvpLocation :: !Location
-    , texLocation :: !Location
-    , mesh        :: !Mesh
+    { program       :: !Program
+    , model         :: !(M44 GLfloat)
+    , texture       :: !Texture
+    , mvpLocation   :: !Location
+    , sunLocation   :: !Location
+    , colorLocation :: !Location
+    , texLocation   :: !Location
+    , mesh          :: !Mesh
     } deriving Show
 
 initTerrain :: IO (Either String Terrain)
@@ -42,11 +46,16 @@ initTerrain = do
 
                         Right mesh' -> do
                             mvpLocation' <- GL.glGetUniformLocation prog "mvp"
+                            sunLocation' <- GL.glGetUniformLocation prog "sunPosition"
+                            colorLocation' <- GL.glGetUniformLocation prog "sunColor"
                             texLocation' <- GL.glGetUniformLocation prog "groundTexture"
                             return $ Right Terrain
                                       { program = prog
+                                      , model = makeTranslate $ V3 (-128.5) 0 (-128.5)
                                       , texture = texture'
                                       , mvpLocation = mvpLocation'
+                                      , sunLocation = sunLocation'
+                                      , colorLocation = colorLocation'
                                       , texLocation = texLocation'
                                       , mesh = mesh'
                                       }
@@ -57,14 +66,15 @@ initTerrain = do
 
         Left err -> return $ Left err
 
-render :: M44 GLfloat -> M44 GLfloat -> Terrain -> IO ()
-render perspective view terrain = do
+render :: M44 GLfloat -> M44 GLfloat -> SunLight -> Terrain -> IO ()
+render perspective view sunLight terrain = do
     GL.glUseProgram $ program terrain
-    GL.glEnable CullFace
-    GL.glCullFace Back
 
-    let mvp = perspective !*! view
+    let mvp = perspective !*! view !*! model terrain
     GL.setMatrix4 (mvpLocation terrain) mvp
+
+    GL.setVector3 (sunLocation terrain) (sunPosition sunLight)
+    GL.setVector3 (colorLocation terrain) (sunColor sunLight)
 
     GL.glBindVertexArray (vao $ mesh terrain)
 
@@ -75,3 +85,7 @@ render perspective view terrain = do
     GL.drawTrianglesVector (indices $ mesh terrain)
 
     GL.glBindVertexArray (VertexArrayObject 0)
+
+makeTranslate :: V3 GLfloat -> M44 GLfloat
+makeTranslate (V3 x y z) =
+    V4 (V4 1 0 0 x) (V4 0 1 0 y) (V4 0 0 1 z) (V4 0 0 0 1)

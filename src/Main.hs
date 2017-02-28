@@ -18,12 +18,14 @@ import           System.Exit      (exitFailure)
 import           Camera           (Camera (matrix), Navigation (..), animate,
                                    initCamera, initNavigation)
 import           EventLoop        (eventLoop)
+import           SunLight         (SunLight, initSun)
 import           Terrain
 
 data RenderState = RenderState
     { terrain      :: !Terrain
     , perspectiveM :: !(M44 GLfloat)
     , camera       :: !Camera
+    , sunLight     :: !SunLight
     , navigation   :: !Navigation
     , lastTime     :: !Double
     } deriving Show
@@ -73,7 +75,8 @@ main = do
             , perspectiveM = perspective (degToRad 45)
                                          ( fromIntegral width / fromIntegral height )
                                          0.001 10000
-            , camera = initCamera (V3 0 1 5) 0
+            , camera = initCamera (V3 0 15 0) 0
+            , sunLight = initSun
             , navigation = initNavigation
             , lastTime = now
             }
@@ -84,6 +87,8 @@ main = do
 
     GL.glClearColor 0 0 0.4 0
     GL.glEnable DepthTest
+    GL.glEnable CullFace
+    GL.glCullFace Back
     --GL.glPolygonMode FrontAndBack Line
     eventLoop window $ renderScene ref
 
@@ -148,7 +153,8 @@ renderScene ref = do
     writeIORef ref renderState { camera = camera', lastTime = now }
 
     GL.glClear [ColorBuffer, DepthBuffer]
-    render (perspectiveM renderState) view (terrain renderState)
+    render (perspectiveM renderState) view
+           (sunLight renderState) (terrain renderState)
 
 width :: Int
 width = 1024

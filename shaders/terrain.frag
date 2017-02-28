@@ -1,8 +1,12 @@
 #version 330 core
 
+in vec3 vNormal;
 in vec2 vTexCoord;
 
-uniform sampler2D groundTexture;
+uniform vec3 sunPosition;
+uniform vec3 sunColor;
+
+uniform sampler2D groundTexture; // Texture unit 0
 
 out vec4 color;
 
