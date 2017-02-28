@@ -6,19 +6,32 @@ module TerrainGen
     ) where
 
 import           Codec.Picture
-import           Data.Vector.Storable            (Vector)
+import           Data.Vector.Storable            (Vector, (!))
 import qualified Data.Vector.Storable            as Vec
+import           Data.Vector.Storable.Mutable    (IOVector)
+import qualified Data.Vector.Storable.Mutable    as MVec
 import           Graphics.LWGL
 import           Graphics.LWGL.Vertex_P_Norm_Tex (Vertex (..))
-import           Linear                          (V2 (..), V3 (..))
+import           Linear                          (V2 (..), V3 (..), cross,
+                                                  normalize)
 
 
 type HeightGen = Int -> Int -> GLfloat
 
 makeTerrainMesh :: Int -> Int -> HeightGen -> IO Mesh
+makeTerrainMesh rows cols height = do
+    let vertices = gridVertices rows cols height
+        indices' = gridIndices (fromIntegral rows) (fromIntegral cols)
+    mVertices <- Vec.unsafeThaw vertices
+    calculateNormals mVertices indices'
+    vertices' <- normalizeNormals <$> Vec.unsafeFreeze mVertices
+    buildFromVector StaticDraw vertices' indices'
+
+{-makeTerrainMesh :: Int -> Int -> HeightGen -> IO Mesh
 makeTerrainMesh rows cols height =
     buildFromVector StaticDraw (gridVertices rows cols height)
                                (gridIndices (fromIntegral rows) (fromIntegral cols))
+-}
 
 makeTerrainMeshFromMap :: FilePath -> IO (Either String Mesh)
 makeTerrainMeshFromMap file = do
@@ -51,6 +64,37 @@ gridIndices rows cols =
             in [ myIndex, myIndex + cols, myIndex + 1
                , myIndex + 1, myIndex + cols, myIndex + 1 + cols
                ]
+
+calculateNormals :: IOVector Vertex -> Vector GLuint -> IO ()
+calculateNormals vertices indices' = go 0
+    where
+        go :: Int -> IO ()
+        go index
+            | index < Vec.length indices' = do
+                let i1 = (fromIntegral $ indices' ! index)
+                    i2 = (fromIntegral $ indices' ! (index + 1))
+                    i3 = (fromIntegral $ indices' ! (index + 2))
+
+                v1 <- MVec.read vertices i1
+                v2 <- MVec.read vertices i2
+                v3 <- MVec.read vertices i3
+
+                let vec1 = position v2 - position v1
+                    vec2 = position v3 - position v1
+                    norm = normalize $ vec1 `cross` vec2
+                --print norm
+
+                MVec.write vertices i1 $ v1 {normal = norm + normal v1}
+                MVec.write vertices i2 $ v2 {normal = norm + normal v2}
+                MVec.write vertices i3 $ v3 {normal = norm + normal v3}
+
+                go $ index + 3
+
+            | otherwise = return ()
+
+
+normalizeNormals :: Vector Vertex -> Vector Vertex
+normalizeNormals = Vec.map (\v -> v {normal = normalize $ normal v})
 
 constHeight :: GLfloat -> Int -> Int -> GLfloat
 constHeight h _ _ = h
