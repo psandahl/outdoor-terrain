@@ -10,9 +10,14 @@ uniform sampler2D groundTexture; // Texture unit 0
 
 out vec4 color;
 
+const float ambientStrength = 0.1;
+
 void main()
 {
-  // Flip the texture horizontally.
-  color = texture(groundTexture, vec2(vTexCoord.s, 1.0 - vTexCoord.t));
-  //color = vec4(0, 1, 0, 1);
+  vec4 ambientColor = vec4(sunColor * ambientStrength, 1);
+
+  // Load texture color. Flip the texture horizontally.
+  vec4 fragColor = texture(groundTexture, vec2(vTexCoord.s, 1.0 - vTexCoord.t));
+
+  color = fragColor + ambientColor;
 }
