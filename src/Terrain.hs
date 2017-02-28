@@ -12,8 +12,7 @@ import           Graphics.LWGL (EnableCapability (..), GLfloat, Location,
 import qualified Graphics.LWGL as GL
 import           Linear        (M44, (!*!))
 
-import           DummyGen      (makeDummyMesh)
---import           TerrainGen    (makeTerrainMeshFromMap)
+import           TerrainGen    (makeTerrainMeshFromMap)
 
 data Terrain = Terrain
     { program     :: !Program
@@ -32,12 +31,13 @@ initTerrain = do
 
         Right prog -> do
 
-            eTexture <- GL.loadTexture2D RGB8 False "textures/test.tga"
+            eTexture <- GL.loadTexture2D RGB8 False "textures/dirt01d.tga"
             case eTexture of
                 Right texture' -> do
 
-                    --eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
-                    eMesh <- Right <$> makeDummyMesh
+                    eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
+                    --eMesh <- Right <$> makeDummyMesh
+                    --eMesh <- Right <$> makeTerrainMesh 10 10 (constHeight 0)
                     case eMesh of
 
                         Right mesh' -> do

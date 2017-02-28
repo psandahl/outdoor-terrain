@@ -7,8 +7,8 @@ module TerrainGen
 
 import           Codec.Picture
 import           Graphics.LWGL
-import           Graphics.LWGL.Vertex_P (Vertex (..))
-import           Linear                 (V3 (..))
+import           Graphics.LWGL.Vertex_P_Tex (Vertex (..))
+import           Linear                     (V2 (..), V3 (..))
 
 type HeightGen = Int -> Int -> GLfloat
 
@@ -35,6 +35,8 @@ gridVertices rows cols height =
                 { position = V3 (fromIntegral col)
                                 (height row col)
                                 (fromIntegral row)
+                , texCoord = V2 (fromIntegral col)
+                                (fromIntegral $ rows - (row + 1))
                 }
 
 gridIndices :: GLuint -> GLuint -> [GLuint]
