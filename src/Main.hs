@@ -15,14 +15,18 @@ import qualified Graphics.UI.GLFW as GLFW
 import           Linear
 import           System.Exit      (exitFailure)
 
-import           Camera           (Camera (matrix), Navigation (..), animate,
-                                   initCamera, initNavigation)
+import           Camera           (Camera (matrix, position), Navigation (..),
+                                   animate, initCamera, initNavigation)
 import           EventLoop        (eventLoop)
+import           SkyBox           (SkyBox, initSkyBox)
+import qualified SkyBox           as SkyBox
 import           SunLight         (SunLight, initSun)
-import           Terrain
+import           Terrain          (Terrain, initTerrain)
+import qualified Terrain          as Terrain
 
 data RenderState = RenderState
-    { terrain      :: !Terrain
+    { skyBox       :: !SkyBox
+    , terrain      :: !Terrain
     , perspectiveM :: !(M44 GLfloat)
     , camera       :: !Camera
     , sunLight     :: !SunLight
@@ -58,6 +62,15 @@ main = do
     GLFW.makeContextCurrent (Just window)
     GLFW.setStickyKeysInputMode window StickyKeysInputMode'Enabled
 
+    eSkyBox <- initSkyBox
+    when (isLeft eSkyBox) $ do
+        let Left err = eSkyBox
+        putStrLn err
+        GLFW.terminate
+        exitFailure
+
+    let Right skyBox' = eSkyBox
+
     eTerrain <- initTerrain
     when (isLeft eTerrain) $ do
         let Left err = eTerrain
@@ -71,7 +84,8 @@ main = do
 
     let renderState =
           RenderState
-            { terrain = terrain'
+            { skyBox = skyBox'
+            , terrain = terrain'
             , perspectiveM = perspective (degToRad 45)
                                          ( fromIntegral width / fromIntegral height )
                                          0.001 10000
@@ -152,9 +166,16 @@ renderScene ref = do
     -- The updated camera and the new timestamp must be written to the state.
     writeIORef ref renderState { camera = camera', lastTime = now }
 
+    -- Clear frame buffers.
     GL.glClear [ColorBuffer, DepthBuffer]
-    render (perspectiveM renderState) view
-           (sunLight renderState) (terrain renderState)
+
+    -- Render sky box.
+    SkyBox.render (perspectiveM renderState) view
+                  (V3 0 15 (-1)) (skyBox renderState)
+
+    -- Render terrain.
+    Terrain.render (perspectiveM renderState) view
+                   (sunLight renderState) (terrain renderState)
 
 width :: Int
 width = 1024

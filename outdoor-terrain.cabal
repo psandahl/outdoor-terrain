@@ -19,8 +19,10 @@ executable outdoor-terrain-exe
   other-modules:       Camera
                        DummyGen
                        EventLoop
+                       Helpers
                        Terrain
                        TerrainGen
+                       SkyBox
                        SunLight
   default-language:    Haskell2010
   ghc-options:         -Wall -O2

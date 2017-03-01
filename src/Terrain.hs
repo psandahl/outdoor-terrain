@@ -12,6 +12,7 @@ import           Graphics.LWGL (EnableCapability (..), GLfloat, Location,
 import qualified Graphics.LWGL as GL
 import           Linear        (M44, V3 (..), V4 (..), (!*!))
 
+import           Helpers       (makeTranslate)
 import           SunLight      (SunLight (..))
 import           TerrainGen    (makeTerrainMeshFromMap)
 
@@ -51,6 +52,9 @@ initTerrain = do
                             sunLocation' <- GL.glGetUniformLocation prog "sunPosition"
                             colorLocation' <- GL.glGetUniformLocation prog "sunColor"
                             texLocation' <- GL.glGetUniformLocation prog "groundTexture"
+
+                            GL.glBindVertexArray (VertexArrayObject 0)
+
                             return $ Right Terrain
                                       { program = prog
                                       , model = makeTranslate $ V3 (-128.5) 0 (-128.5)
@@ -89,7 +93,3 @@ render perspective view sunLight terrain = do
     GL.drawTrianglesVector (indices $ mesh terrain)
 
     GL.glBindVertexArray (VertexArrayObject 0)
-
-makeTranslate :: V3 GLfloat -> M44 GLfloat
-makeTranslate (V3 x y z) =
-    V4 (V4 1 0 0 x) (V4 0 1 0 y) (V4 0 0 1 z) (V4 0 0 0 1)
