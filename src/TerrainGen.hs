@@ -110,7 +110,7 @@ greyScalePixel img x y =
     in red
 
 heightScale :: GLfloat
-heightScale = 12
+heightScale = 11
 
 for_ :: [a] -> (a -> b) -> [b]
 for_ = flip map
