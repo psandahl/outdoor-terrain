@@ -108,6 +108,30 @@ main = do
 
     GLFW.terminate
 
+renderScene :: IORef RenderState -> IO ()
+renderScene ref = do
+    renderState <- readIORef ref
+
+    Just now <- GLFW.getTime
+
+    let duration = now - lastTime renderState
+        camera'  = animate (navigation renderState) duration (camera renderState)
+        view     = matrix camera'
+
+    -- The updated camera and the new timestamp must be written to the state.
+    writeIORef ref renderState { camera = camera', lastTime = now }
+
+    -- Clear frame buffers.
+    GL.glClear [ColorBuffer, DepthBuffer]
+
+    -- Render sky box.
+    SkyBox.render (perspectiveM renderState) view
+                  (V3 0 15 (-1)) (skyBox renderState)
+
+    -- Render terrain.
+    Terrain.render (perspectiveM renderState) view
+                   (sunLight renderState) (terrain renderState)
+
 keyCallback :: IORef RenderState -> Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keyCallback ref _ key _ keyState _ =
     case key of
@@ -152,30 +176,6 @@ setUp :: Bool -> RenderState -> RenderState
 setUp val renderState =
     let nav = navigation renderState
     in renderState { navigation = nav { up = val } }
-
-renderScene :: IORef RenderState -> IO ()
-renderScene ref = do
-    renderState <- readIORef ref
-
-    Just now <- GLFW.getTime
-
-    let duration = now - lastTime renderState
-        camera'  = animate (navigation renderState) duration (camera renderState)
-        view     = matrix camera'
-
-    -- The updated camera and the new timestamp must be written to the state.
-    writeIORef ref renderState { camera = camera', lastTime = now }
-
-    -- Clear frame buffers.
-    GL.glClear [ColorBuffer, DepthBuffer]
-
-    -- Render sky box.
-    SkyBox.render (perspectiveM renderState) view
-                  (V3 0 15 (-1)) (skyBox renderState)
-
-    -- Render terrain.
-    Terrain.render (perspectiveM renderState) view
-                   (sunLight renderState) (terrain renderState)
 
 width :: Int
 width = 1024
