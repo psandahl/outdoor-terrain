@@ -100,7 +100,6 @@ main = do
     GLFW.setKeyCallback window $ Just (keyCallback ref)
 
     GL.glClearColor 0 0 0.4 0
-    GL.glEnable DepthTest
     GL.glEnable CullFace
     GL.glCullFace Back
     --GL.glPolygonMode FrontAndBack Line

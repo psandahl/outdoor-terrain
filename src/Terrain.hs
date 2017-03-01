@@ -75,6 +75,8 @@ initTerrain = do
 
 render :: M44 GLfloat -> M44 GLfloat -> SunLight -> Terrain -> IO ()
 render perspective view sunLight terrain = do
+    GL.glEnable DepthTest
+
     GL.glUseProgram $ program terrain
 
     let mvp = perspective !*! view !*! model terrain

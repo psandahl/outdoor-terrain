@@ -4,7 +4,8 @@ module SkyBox
     , render
     ) where
 
-import           Graphics.LWGL          (BufferUsage (..), GLfloat, GLuint,
+import           Graphics.LWGL          (BufferUsage (..),
+                                         EnableCapability (..), GLfloat, GLuint,
                                          Location, Mesh (..), Program,
                                          ShaderType (..),
                                          VertexArrayObject (..))
@@ -42,7 +43,12 @@ initSkyBox = do
 
 render :: M44 GLfloat -> M44 GLfloat -> V3 GLfloat -> SkyBox -> IO ()
 render proj view model skyBox = do
+    -- The sky box must be rendered without depth information as it will
+    -- be rendered close to the camera.
+    GL.glEnable DepthTest
+
     GL.glUseProgram $ program skyBox
+
     GL.glBindVertexArray (vao $ mesh skyBox)
 
     let mvp = proj !*! view !*! makeTranslate model
