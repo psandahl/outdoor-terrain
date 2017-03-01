@@ -125,7 +125,7 @@ renderScene ref = do
 
     -- Render sky box.
     SkyBox.render (perspectiveM renderState) view
-                  (V3 0 15 (-1)) (skyBox renderState)
+                  (position camera') (skyBox renderState)
 
     -- Render terrain.
     Terrain.render (perspectiveM renderState) view

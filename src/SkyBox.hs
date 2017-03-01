@@ -45,7 +45,7 @@ render :: M44 GLfloat -> M44 GLfloat -> V3 GLfloat -> SkyBox -> IO ()
 render proj view model skyBox = do
     -- The sky box must be rendered without depth information as it will
     -- be rendered close to the camera.
-    GL.glEnable DepthTest
+    GL.glDisable DepthTest
 
     GL.glUseProgram $ program skyBox
 
@@ -62,9 +62,21 @@ vertices :: [Vertex]
 vertices =
     [ Vertex {position = V3 (-1) 1 (-1)}
     , Vertex {position = V3 1 1 (-1)}
+    , Vertex {position = V3 (-1) 1 1}
+    , Vertex {position = V3 1 1 1}
+
     , Vertex {position = V3 (-1) (-1) (-1)}
     , Vertex {position = V3 1 (-1) (-1)}
+    , Vertex {position = V3 (-1) (-1) 1}
+    , Vertex {position = V3 1 (-1) 1}
     ]
 
 indices' :: [GLuint]
-indices' = [0, 2, 1, 1, 2, 3]
+indices' =
+    [ 0, 4, 1, 1, 4, 5 -- Front
+    , 1, 5, 3, 3, 5, 7 -- Right
+    , 2, 6, 0, 0, 6, 4 -- Left
+    , 3, 7, 2, 2, 7, 6 -- Back
+    , 2, 0, 3, 3, 0, 1 -- Top
+    , 4, 6, 5, 5, 6, 7 -- Bottom
+    ]
