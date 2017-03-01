@@ -60,10 +60,10 @@ render proj view model skyBox = do
 
 vertices :: [Vertex]
 vertices =
-    [ Vertex {position = V3 (-0.5) 0.5 (-0.5)}
-    , Vertex {position = V3 0.5 0.5 (-0.5)}
-    , Vertex {position = V3 (-0.5) (-0.5) (-0.5)}
-    , Vertex {position = V3 0.5 (-0.5) (-0.5)}
+    [ Vertex {position = V3 (-1) 1 (-1)}
+    , Vertex {position = V3 1 1 (-1)}
+    , Vertex {position = V3 (-1) (-1) (-1)}
+    , Vertex {position = V3 1 (-1) (-1)}
     ]
 
 indices' :: [GLuint]
