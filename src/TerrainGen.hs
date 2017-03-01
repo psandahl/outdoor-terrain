@@ -71,9 +71,9 @@ calculateNormals vertices indices' = go 0
         go :: Int -> IO ()
         go index
             | index < Vec.length indices' = do
-                let i1 = (fromIntegral $ indices' ! index)
-                    i2 = (fromIntegral $ indices' ! (index + 1))
-                    i3 = (fromIntegral $ indices' ! (index + 2))
+                let i1 = fromIntegral (indices' ! index)
+                    i2 = fromIntegral (indices' ! (index + 1))
+                    i3 = fromIntegral (indices' ! (index + 2))
 
                 v1 <- MVec.read vertices i1
                 v2 <- MVec.read vertices i2
@@ -100,7 +100,7 @@ constHeight :: GLfloat -> Int -> Int -> GLfloat
 constHeight h _ _ = h
 
 mapHeight :: Image PixelRGB8 -> Int -> Int -> GLfloat
-mapHeight img x y = (fromIntegral $ greyScalePixel img x y) / heightScale
+mapHeight img x y = fromIntegral (greyScalePixel img x y) / heightScale
 
 -- | Read a pixel from an RGB8, and assume it's grey scale (i.e. all
 -- channels having the same value). Read the red channel and return the value.

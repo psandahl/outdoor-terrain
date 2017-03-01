@@ -62,7 +62,7 @@ animate navigation durationD camera =
     where
         turnLeft :: GLfloat -> Camera -> Camera
         turnLeft theta cam =
-            if (left navigation)
+            if left navigation
                 then
                     let yRotation' = yRotation cam + theta
                     in cam { yRotation = yRotation'
@@ -72,7 +72,7 @@ animate navigation durationD camera =
 
         turnRight :: GLfloat -> Camera -> Camera
         turnRight theta cam =
-            if (right navigation)
+            if right navigation
                 then
                     let yRotation' = yRotation cam - theta
                     in cam { yRotation = yRotation'
@@ -82,7 +82,7 @@ animate navigation durationD camera =
 
         goDown :: GLfloat -> Camera -> Camera
         goDown duration cam =
-            if (up navigation)
+            if up navigation
                 then
                     let stride = duration * moveSpeed *^ V3 0 1 0
                     in cam { position = position cam + stride }
@@ -90,7 +90,7 @@ animate navigation durationD camera =
 
         goUp :: GLfloat -> Camera -> Camera
         goUp duration cam =
-            if (down navigation)
+            if down navigation
                 then
                     let stride = duration * moveSpeed *^ V3 0 1 0
                     in cam { position = position cam - stride }
@@ -98,7 +98,7 @@ animate navigation durationD camera =
 
         goForward :: GLfloat -> Camera -> Camera
         goForward duration cam =
-            if (forward navigation)
+            if forward navigation
                 then
                     let stride = duration * moveSpeed *^ direction cam
                     in cam { position = position cam + stride }
@@ -106,7 +106,7 @@ animate navigation durationD camera =
 
         goBackward :: GLfloat -> Camera -> Camera
         goBackward duration cam =
-            if (backward navigation)
+            if backward navigation
                 then
                     let stride = duration * moveSpeed *^ direction cam
                     in cam { position = position cam - stride }

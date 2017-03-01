@@ -2,6 +2,7 @@ module EventLoop
     ( eventLoop
     ) where
 
+import           Control.Monad    (unless)
 import           Graphics.UI.GLFW (Key (..), KeyState (..), Window, getKey,
                                    pollEvents, swapBuffers, windowShouldClose)
 
@@ -18,6 +19,5 @@ eventLoop window action = go
 
             escState <- getKey window Key'Escape
             shouldClose <- windowShouldClose window
-            if shouldClose || escState == KeyState'Pressed
-                then return ()
-                else go
+            unless (shouldClose || escState == KeyState'Pressed)
+                go

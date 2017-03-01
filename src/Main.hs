@@ -1,6 +1,6 @@
 module Main where
 
-import           Control.Monad    (when)
+import           Control.Monad    (unless, when)
 import           Data.Either      (isLeft)
 import           Data.IORef       (IORef, modifyIORef, newIORef, readIORef,
                                    writeIORef)
@@ -19,10 +19,10 @@ import           Camera           (Camera (matrix, position), Navigation (..),
                                    animate, initCamera, initNavigation)
 import           EventLoop        (eventLoop)
 import           SkyBox           (SkyBox, initSkyBox)
-import qualified SkyBox           as SkyBox
+import qualified SkyBox
 import           SunLight         (SunLight, initSun)
 import           Terrain          (Terrain, initTerrain)
-import qualified Terrain          as Terrain
+import qualified Terrain
 
 data RenderState = RenderState
     { skyBox       :: !SkyBox
@@ -37,7 +37,7 @@ data RenderState = RenderState
 createGLContext :: IO Window
 createGLContext = do
     initSuccess <- GLFW.init
-    when (not initSuccess) $ do
+    unless initSuccess $ do
         putStrLn "GLFW initialization failed"
         exitFailure
 
