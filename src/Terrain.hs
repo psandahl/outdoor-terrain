@@ -36,7 +36,7 @@ initTerrain = do
 
         Right prog -> do
 
-            eTexture <- GL.loadTexture2D RGB8 False "textures/dirt01d.tga"
+            eTexture <- GL.loadTexture2D RGB8 True "textures/dirt01d.tga"
             case eTexture of
                 Right texture' -> do
 
