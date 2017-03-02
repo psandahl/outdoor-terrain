@@ -129,7 +129,8 @@ renderScene ref = do
 
     -- Render terrain.
     Terrain.render (perspectiveM renderState) view
-                   (sunLight renderState) (terrain renderState)
+                   (sunLight renderState) (position camera')
+                   (terrain renderState)
 
 keyCallback :: IORef RenderState -> Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keyCallback ref _ key _ keyState _ =

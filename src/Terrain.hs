@@ -23,6 +23,7 @@ data Terrain = Terrain
     , modelLocation :: !Location
     , sunLocation   :: !Location
     , colorLocation :: !Location
+    , eyeLocation   :: !Location
     , texLocation   :: !Location
     , mesh          :: !Mesh
     } deriving Show
@@ -51,6 +52,7 @@ initTerrain = do
                             modelLocation' <- GL.glGetUniformLocation prog "model"
                             sunLocation' <- GL.glGetUniformLocation prog "sunPosition"
                             colorLocation' <- GL.glGetUniformLocation prog "sunColor"
+                            eyeLocation' <- GL.glGetUniformLocation prog "eyePosition"
                             texLocation' <- GL.glGetUniformLocation prog "groundTexture"
 
                             GL.glBindVertexArray (VertexArrayObject 0)
@@ -63,6 +65,7 @@ initTerrain = do
                                       , modelLocation = modelLocation'
                                       , sunLocation = sunLocation'
                                       , colorLocation = colorLocation'
+                                      , eyeLocation = eyeLocation'
                                       , texLocation = texLocation'
                                       , mesh = mesh'
                                       }
@@ -73,8 +76,8 @@ initTerrain = do
 
         Left err -> return $ Left err
 
-render :: M44 GLfloat -> M44 GLfloat -> SunLight -> Terrain -> IO ()
-render perspective view sunLight terrain = do
+render :: M44 GLfloat -> M44 GLfloat -> SunLight -> V3 GLfloat -> Terrain -> IO ()
+render perspective view sunLight eyePosition terrain = do
     GL.glEnable DepthTest
 
     GL.glUseProgram $ program terrain
@@ -85,6 +88,7 @@ render perspective view sunLight terrain = do
 
     GL.setVector3 (sunLocation terrain) (sunPosition sunLight)
     GL.setVector3 (colorLocation terrain) (sunColor sunLight)
+    GL.setVector3 (eyeLocation terrain) eyePosition
 
     GL.glBindVertexArray (vao $ mesh terrain)
 
