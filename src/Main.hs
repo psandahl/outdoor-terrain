@@ -10,7 +10,7 @@ import           Graphics.LWGL    (ClearBufferMask (..), EnableCapability (..),
 import qualified Graphics.LWGL    as GL
 import           Graphics.UI.GLFW (Key (..), KeyState (..), ModifierKeys,
                                    OpenGLProfile (..), StickyKeysInputMode (..),
-                                   Window, WindowHint (..))
+                                   VideoMode (..), Window, WindowHint (..))
 import qualified Graphics.UI.GLFW as GLFW
 import           Linear
 import           System.Exit      (exitFailure)
@@ -34,13 +34,14 @@ data RenderState = RenderState
     , lastTime     :: !Double
     } deriving Show
 
-createGLContext :: IO Window
-createGLContext = do
+createGLContext :: Bool -> IO (Window, Int, Int)
+createGLContext fullScreen = do
     initSuccess <- GLFW.init
     unless initSuccess $ do
         putStrLn "GLFW initialization failed"
         exitFailure
 
+    GLFW.windowHint $ WindowHint'Resizable False
     GLFW.windowHint $ WindowHint'Samples 4
     GLFW.windowHint $ WindowHint'ContextVersionMajor 3
     GLFW.windowHint $ WindowHint'ContextVersionMinor 3
@@ -48,17 +49,22 @@ createGLContext = do
     --GLFW.windowHint $ WindowHint'OpenGLDebugContext True
     GLFW.windowHint $ WindowHint'OpenGLProfile OpenGLProfile'Core
 
-    window <- GLFW.createWindow width height "Outdoor terrain" Nothing Nothing
-    when (isNothing window) $ do
+    monitor <- if fullScreen then GLFW.getPrimaryMonitor
+                             else return Nothing
+
+    eWindow <- GLFW.createWindow defaultWidth defaultHeight "Outdoor terrain" monitor Nothing
+    when (isNothing eWindow) $ do
         putStrLn "Failed to create GLFW window"
         GLFW.terminate
         exitFailure
+    let window = fromJust eWindow
+    print =<< GLFW.getFramebufferSize window
 
-    return $ fromJust window
+    return (window, defaultWidth, defaultHeight)
 
 main :: IO ()
 main = do
-    window <- createGLContext
+    (window, width, height) <- createGLContext False
     GLFW.makeContextCurrent (Just window)
     GLFW.setStickyKeysInputMode window StickyKeysInputMode'Enabled
 
@@ -177,11 +183,11 @@ setUp val renderState =
     let nav = navigation renderState
     in renderState { navigation = nav { up = val } }
 
-width :: Int
-width = 1024
+defaultWidth :: Int
+defaultWidth = 1280
 
-height :: Int
-height = 768
+defaultHeight :: Int
+defaultHeight = 960
 
 degToRad :: Float -> Float
 degToRad deg = deg * (pi / 180)
