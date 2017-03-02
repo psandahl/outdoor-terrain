@@ -21,6 +21,7 @@ import           EventLoop        (eventLoop)
 import           SkyBox           (SkyBox, initSkyBox)
 import qualified SkyBox
 import           SunLight         (SunLight, initSun)
+import qualified SunLight
 import           Terrain          (Terrain, initTerrain)
 import qualified Terrain
 
@@ -140,6 +141,9 @@ renderScene ref = do
     -- Render sky box.
     SkyBox.render (perspectiveM renderState) view
                   (position camera') (skyBox renderState)
+
+    -- Render sun light.
+    SunLight.render (perspectiveM renderState) view (sunLight renderState)
 
     -- Render terrain.
     Terrain.render (perspectiveM renderState) view
