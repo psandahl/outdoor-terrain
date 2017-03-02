@@ -44,8 +44,8 @@ initSun = do
                 , mvpLocation = mvpLocation'
                 , colorLocation = colorLocation'
                 , vao = vao'
-                , sunPosition = V3 0 100 (-200)
-                , sunColor = V3 (255 / 255) (255 / 255) (251 / 255)
+                , sunPosition = V3 0 300 (-1000)
+                , sunColor = V3 (245 / 255) (255 / 255) (235 / 255)
                 }
 
         Left err -> return $ Left err
@@ -57,7 +57,7 @@ render proj view sunLight = do
     GL.glUseProgram $ program sunLight
     GL.glBindVertexArray $ vao sunLight
 
-    let mvp = proj !*! view !*! makeTranslate (V3 0 15 (-2))
+    let mvp = proj !*! view !*! makeTranslate (sunPosition sunLight)
     GL.setMatrix4 (mvpLocation sunLight) mvp
     GL.setVector3 (colorLocation sunLight) $ sunColor sunLight
 

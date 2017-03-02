@@ -117,6 +117,7 @@ main = do
     GL.glClearColor 0 0 0.4 0
     GL.glEnable CullFace
     GL.glCullFace Back
+    GL.glEnable ProgramPointSize
     --GL.glPolygonMode FrontAndBack Line
     eventLoop window $ renderScene ref
 
