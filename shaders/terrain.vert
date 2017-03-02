@@ -10,12 +10,14 @@ uniform mat4 model;
 
 out vec3 vPosition;
 out vec3 vNormal;
+out vec3 vColor;
 out vec2 vTexCoord;
 
 void main()
 {
   vPosition = vec3(model * vec4(position, 1.0));
   vNormal = vec3(model * vec4(normal, 0.0));
+  vColor = color;
   vTexCoord = texCoord;
 
   gl_Position = mvp * vec4(position, 1.0);

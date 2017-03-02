@@ -2,6 +2,7 @@ module TerrainGen
     ( makeTerrainMesh
     , makeTerrainMeshFromMap
     , constHeight
+    , constColor
     , mapHeight
     ) where
 
@@ -17,10 +18,11 @@ import           Linear                              (V2 (..), V3 (..), cross,
 
 
 type HeightGen = Int -> Int -> GLfloat
+type ColorGen = Int -> Int -> V3 GLfloat
 
-makeTerrainMesh :: Int -> Int -> HeightGen -> IO Mesh
-makeTerrainMesh rows cols height = do
-    let vertices = gridVertices rows cols height
+makeTerrainMesh :: Int -> Int -> HeightGen -> ColorGen -> IO Mesh
+makeTerrainMesh rows cols height color' = do
+    let vertices = gridVertices rows cols height color'
         indices' = gridIndices (fromIntegral rows) (fromIntegral cols)
     mVertices <- Vec.unsafeThaw vertices
     calculateNormals mVertices indices'
@@ -41,10 +43,11 @@ makeTerrainMeshFromMap file = do
             Right <$> makeTerrainMesh (imageWidth img)
                                       (imageHeight img)
                                       (mapHeight img)
+                                      (constColor $ V3 1 0 0)
         Left err -> return $ Left err
 
-gridVertices :: Int -> Int -> HeightGen -> Vector Vertex
-gridVertices rows cols height =
+gridVertices :: Int -> Int -> HeightGen -> ColorGen -> Vector Vertex
+gridVertices rows cols height color' =
     Vec.fromList $ concat $ for_ [0 .. rows - 1] $ \row ->
         for_ [0 .. cols - 1] $ \col ->
             Vertex
@@ -52,7 +55,7 @@ gridVertices rows cols height =
                                 (height row col)
                                 (fromIntegral row)
                 , normal = V3 0 0 0
-                , color = V3 0 0 0
+                , color = color' row col
                 , texCoord = V2 (fromIntegral col)
                                 (fromIntegral $ rows - (row + 1))
                 }
@@ -99,6 +102,9 @@ normalizeNormals = Vec.map (\v -> v {normal = normalize $ normal v})
 
 constHeight :: GLfloat -> Int -> Int -> GLfloat
 constHeight h _ _ = h
+
+constColor :: V3 GLfloat -> Int -> Int -> V3 GLfloat
+constColor c _ _ = c
 
 mapHeight :: Image PixelRGB8 -> Int -> Int -> GLfloat
 mapHeight img x y = fromIntegral (greyScalePixel img x y) / heightScale
