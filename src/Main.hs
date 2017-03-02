@@ -86,6 +86,14 @@ main = do
 
     let Right terrain' = eTerrain
 
+    eSunLight <- initSun
+    when (isLeft eSunLight) $ do
+        let Left err = eSunLight
+        putStrLn err
+        GLFW.terminate
+        exitFailure
+    let Right sunLight' = eSunLight
+
     Just now <- GLFW.getTime
 
     let renderState =
@@ -96,7 +104,7 @@ main = do
                                          ( fromIntegral width / fromIntegral height )
                                          0.001 10000
             , camera = initCamera (V3 0 15 0) 0
-            , sunLight = initSun
+            , sunLight = sunLight'
             , navigation = initNavigation
             , lastTime = now
             }

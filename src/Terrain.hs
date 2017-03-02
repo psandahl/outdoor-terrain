@@ -12,7 +12,7 @@ import qualified Graphics.LWGL as GL
 import           Linear        (M44, V3 (..), (!*!))
 
 import           Helpers       (makeTranslate)
-import           SunLight      (SunLight (..))
+import           SunLight      (SunLight (sunColor, sunPosition))
 import           TerrainGen    (makeTerrainMeshFromMap)
 
 data Terrain = Terrain
