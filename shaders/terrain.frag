@@ -33,7 +33,7 @@ void main()
 
   // Load texture color and mix with vertex color. Flip the texture horizontally.
   vec4 texColor = texture(groundTexture, vec2(vTexCoord.s, 1.0 - vTexCoord.t));
-  vec4 fragColor = mix(vec4(vColor, 1), texColor, 0.9);
+  vec4 fragColor = mix(vec4(vColor, 1), texColor, 0.1);
 
   color = fragColor + ambientColor + diffuseColor;
 }

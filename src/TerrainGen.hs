@@ -4,9 +4,11 @@ module TerrainGen
     , constHeight
     , constColor
     , mapHeight
+    , mapColor
     ) where
 
-import           Codec.Picture
+import           Codec.Picture                       (Image (..), Pixel8,
+                                                      PixelRGB8 (..), pixelAt)
 import           Data.Vector.Storable                (Vector, (!))
 import qualified Data.Vector.Storable                as Vec
 import           Data.Vector.Storable.Mutable        (IOVector)
@@ -27,6 +29,7 @@ makeTerrainMesh rows cols height color' = do
     mVertices <- Vec.unsafeThaw vertices
     calculateNormals mVertices indices'
     vertices' <- normalizeNormals <$> Vec.unsafeFreeze mVertices
+    --writeFile "/tmp/vertices.txt" $ show vertices'
     buildFromVector StaticDraw vertices' indices'
 
 {-makeTerrainMesh :: Int -> Int -> HeightGen -> IO Mesh
@@ -35,15 +38,16 @@ makeTerrainMesh rows cols height =
                                (gridIndices (fromIntegral rows) (fromIntegral cols))
 -}
 
-makeTerrainMeshFromMap :: FilePath -> IO (Either String Mesh)
-makeTerrainMeshFromMap file = do
-    eImg <- readImageRGB8 file
-    case eImg of
-        Right img ->
-            Right <$> makeTerrainMesh (imageWidth img)
-                                      (imageHeight img)
-                                      (mapHeight img)
-                                      (constColor $ V3 1 0 0)
+makeTerrainMeshFromMap :: FilePath -> FilePath -> IO (Either String Mesh)
+makeTerrainMeshFromMap heightFile colorFile = do
+    eImages <- sequence <$> mapM readImageRGB8 [heightFile, colorFile]
+    case eImages of
+        Right [heightMap, colorMap] ->
+            Right <$> makeTerrainMesh (imageWidth heightMap)
+                                      (imageHeight heightMap)
+                                      (mapHeight heightMap)
+                                      (mapColor colorMap)
+        Right _ -> return $ Left "Wrong number of files"
         Left err -> return $ Left err
 
 gridVertices :: Int -> Int -> HeightGen -> ColorGen -> Vector Vertex
@@ -115,6 +119,12 @@ greyScalePixel :: Image PixelRGB8 -> Int -> Int -> Pixel8
 greyScalePixel img x y =
     let PixelRGB8 red _green _blue = pixelAt img x y
     in red
+
+mapColor :: Image PixelRGB8 -> Int -> Int -> V3 GLfloat
+mapColor img x y =
+    let PixelRGB8 red green blue = pixelAt img x y
+        toColor c = fromIntegral c / 255.0
+    in V3 (toColor red) (toColor green) (toColor blue)
 
 heightScale :: GLfloat
 heightScale = 11

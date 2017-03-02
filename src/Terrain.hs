@@ -5,12 +5,11 @@ module Terrain
     ) where
 
 import           Graphics.LWGL (EnableCapability (..), GLfloat, Location,
-                                Mesh (..), PolygonFace (..), Program,
-                                ShaderType (..), Texture, TextureFormat (..),
-                                TextureTarget (..), TextureUnit (..),
-                                VertexArrayObject (..))
+                                Mesh (..), Program, ShaderType (..), Texture,
+                                TextureFormat (..), TextureTarget (..),
+                                TextureUnit (..), VertexArrayObject (..))
 import qualified Graphics.LWGL as GL
-import           Linear        (M44, V3 (..), V4 (..), (!*!))
+import           Linear        (M44, V3 (..), (!*!))
 
 import           Helpers       (makeTranslate)
 import           SunLight      (SunLight (..))
@@ -42,6 +41,7 @@ initTerrain = do
                 Right texture' -> do
 
                     eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
+                                                    "colormaps/colormap.bmp"
                     --eMesh <- Right <$> makeDummyMesh
                     --eMesh <- Right <$> makeTerrainMesh 10 10 (constHeight 0)
                     case eMesh of
