@@ -5,7 +5,7 @@ uniform vec3 sunColor;
 out vec4 color;
 
 const vec4 blue = vec4(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
-const vec4 glow = vec4(255.0 / 255.0, 225.0 / 255.0, 53.0 / 255.0, 1.0);
+const vec4 glow = vec4(255.0 / 255.0, 225.0 / 255.0, 193.0 / 255.0, 1.0);
 
 vec4 skyColor()
 {
