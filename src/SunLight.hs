@@ -44,7 +44,7 @@ initSun = do
                 , mvpLocation = mvpLocation'
                 , colorLocation = colorLocation'
                 , vao = vao'
-                , sunPosition = V3 0 300 (-1000)
+                , sunPosition = V3 1000 200 0
                 , sunColor = V3 (245 / 255) (255 / 255) (235 / 255)
                 }
 
