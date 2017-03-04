@@ -26,13 +26,14 @@ import           Terrain          (Terrain, initTerrain)
 import qualified Terrain
 
 data RenderState = RenderState
-    { skyBox       :: !SkyBox
-    , terrain      :: !Terrain
-    , perspectiveM :: !(M44 GLfloat)
-    , camera       :: !Camera
-    , sunLight     :: !SunLight
-    , navigation   :: !Navigation
-    , lastTime     :: !Double
+    { skyBox          :: !SkyBox
+    , terrain         :: !Terrain
+    , perspectiveM    :: !(M44 GLfloat)
+    , camera          :: !Camera
+    , sunLight        :: !SunLight
+    , navigation      :: !Navigation
+    , lastTime        :: !Double
+    , renderWireframe :: !Bool
     } deriving Show
 
 createGLContext :: Bool -> IO (Window, Int, Int)
@@ -108,6 +109,7 @@ main = do
             , sunLight = sunLight'
             , navigation = initNavigation
             , lastTime = now
+            , renderWireframe = False
             }
 
     ref <- newIORef renderState
@@ -147,9 +149,15 @@ renderScene ref = do
     SunLight.render (perspectiveM renderState) view (sunLight renderState)
 
     -- Render terrain.
+    when (renderWireframe renderState) $
+        GL.glPolygonMode FrontAndBack Line
+
     Terrain.render (perspectiveM renderState) view
                    (sunLight renderState) (position camera')
                    (terrain renderState)
+
+    when (renderWireframe renderState) $
+        GL.glPolygonMode FrontAndBack Fill
 
 keyCallback :: IORef RenderState -> Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keyCallback ref _ key _ keyState _ =
@@ -160,6 +168,7 @@ keyCallback ref _ key _ keyState _ =
         Key'Right -> modifyIORef ref $ setRight (isActive keyState)
         Key'A     -> modifyIORef ref $ setUp (isActive keyState)
         Key'Z     -> modifyIORef ref $ setDown (isActive keyState)
+        Key'F2    -> modifyIORef ref $ toggleWireframe (isActive keyState)
         _         -> return ()
 
 isActive :: KeyState -> Bool
@@ -195,6 +204,12 @@ setUp :: Bool -> RenderState -> RenderState
 setUp val renderState =
     let nav = navigation renderState
     in renderState { navigation = nav { up = val } }
+
+toggleWireframe :: Bool -> RenderState -> RenderState
+toggleWireframe val renderState =
+    if val
+        then renderState { renderWireframe =  not (renderWireframe renderState) }
+        else renderState
 
 defaultWidth :: Int
 defaultWidth = 1280
