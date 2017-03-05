@@ -10,6 +10,7 @@ uniform vec3 sunColor; // The sun's color
 uniform vec3 eyePosition; // The eye's position in model space
 
 uniform sampler2D groundTexture; // Texture unit 0
+uniform sampler2D normalMap; // Texture unit 1
 
 out vec4 color; // Final fragment color
 

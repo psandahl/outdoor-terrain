@@ -16,16 +16,18 @@ import           SunLight      (SunLight (sunColor, sunPosition))
 import           TerrainGen    (makeTerrainMeshFromMap)
 
 data Terrain = Terrain
-    { program       :: !Program
-    , model         :: !(M44 GLfloat)
-    , texture       :: !Texture
-    , mvpLocation   :: !Location
-    , modelLocation :: !Location
-    , sunLocation   :: !Location
-    , colorLocation :: !Location
-    , eyeLocation   :: !Location
-    , texLocation   :: !Location
-    , mesh          :: !Mesh
+    { program         :: !Program
+    , model           :: !(M44 GLfloat)
+    , texture         :: !Texture
+    , normalMap       :: !Texture
+    , mvpLocation     :: !Location
+    , modelLocation   :: !Location
+    , sunLocation     :: !Location
+    , colorLocation   :: !Location
+    , eyeLocation     :: !Location
+    , texLocation     :: !Location
+    , normMapLocation :: !Location
+    , mesh            :: !Mesh
     } deriving Show
 
 initTerrain :: IO (Either String Terrain)
@@ -37,9 +39,13 @@ initTerrain = do
 
         Right prog -> do
 
-            eTexture <- GL.loadTexture2D RGB8 True "textures/dirt01d.tga"
-            case eTexture of
-                Right texture' -> do
+            eTextures <-
+                sequence <$> mapM (uncurry $ GL.loadTexture2D RGB8)
+                                 [ (True, "textures/dirt01d.tga")
+                                 , (False, "textures/dirt01n.tga")
+                                 ]
+            case eTextures of
+                Right [texture', normalMap'] -> do
 
                     eMesh <- makeTerrainMeshFromMap "heightmaps/heightmap.bmp"
                                                     "colormaps/colormap.bmp"
@@ -54,6 +60,7 @@ initTerrain = do
                             colorLocation' <- GL.glGetUniformLocation prog "sunColor"
                             eyeLocation' <- GL.glGetUniformLocation prog "eyePosition"
                             texLocation' <- GL.glGetUniformLocation prog "groundTexture"
+                            normMapLocation' <- GL.glGetUniformLocation prog "normalMap"
 
                             GL.glBindVertexArray (VertexArrayObject 0)
 
@@ -61,16 +68,20 @@ initTerrain = do
                                       { program = prog
                                       , model = makeTranslate $ V3 (-128.5) 0 (-128.5)
                                       , texture = texture'
+                                      , normalMap = normalMap'
                                       , mvpLocation = mvpLocation'
                                       , modelLocation = modelLocation'
                                       , sunLocation = sunLocation'
                                       , colorLocation = colorLocation'
                                       , eyeLocation = eyeLocation'
                                       , texLocation = texLocation'
+                                      , normMapLocation = normMapLocation'
                                       , mesh = mesh'
                                       }
 
                         Left err -> return $ Left err
+
+                Right _ -> return $ Left "Unexpected number of textures"
 
                 Left err -> return $ Left err
 
@@ -95,6 +106,10 @@ render perspective view sunLight eyePosition terrain = do
     GL.glActiveTexture $ TextureUnit 0
     GL.glBindTexture Texture2D $ texture terrain
     GL.glUniform1i (texLocation terrain) 0
+
+    GL.glActiveTexture $ TextureUnit 1
+    GL.glBindTexture Texture2D $ normalMap terrain
+    GL.glUniform1i (normMapLocation terrain) 1
 
     GL.drawTrianglesVector (indices $ mesh terrain)
 
