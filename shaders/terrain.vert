@@ -11,6 +11,7 @@ uniform mat4 model;
 
 out vec3 vPosition;
 out vec3 vNormal;
+out vec3 vTangent;
 out vec3 vColor;
 out vec2 vTexCoord;
 
@@ -18,6 +19,7 @@ void main()
 {
   vPosition = (model * vec4(position, 1.0)).xyz;
   vNormal = (model * vec4(normal, 0.0)).xyz;
+  vTangent = (model * vec4(tangent, 0.0)).xyz;
   vColor = color;
   vTexCoord = texCoord;
 
