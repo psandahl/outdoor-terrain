@@ -30,3 +30,9 @@ The dirt surface covering all terrain is bump mapped to show more details
 when close to the surface.
 
 ![Bump mapped surface](https://raw.githubusercontent.com/psandahl/outdoor-terrain/master/screenshots/bumped-surface.png)
+
+## Another favorite view
+
+A view with different lights and fog.
+
+![Favorite view](https://raw.githubusercontent.com/psandahl/outdoor-terrain/master/screenshots/favorite-view.png)

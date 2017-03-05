@@ -59,10 +59,8 @@ createGLContext fullScreen = do
         putStrLn "Failed to create GLFW window"
         GLFW.terminate
         exitFailure
-    let window = fromJust eWindow
-    print =<< GLFW.getFramebufferSize window
 
-    return (window, defaultWidth, defaultHeight)
+    return (fromJust eWindow, defaultWidth, defaultHeight)
 
 main :: IO ()
 main = do
@@ -120,7 +118,7 @@ main = do
     GL.glEnable CullFace
     GL.glCullFace Back
     GL.glEnable ProgramPointSize
-    --GL.glPolygonMode FrontAndBack Line
+
     eventLoop window $ renderScene ref
 
     GLFW.terminate
