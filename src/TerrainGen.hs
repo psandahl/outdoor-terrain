@@ -29,7 +29,7 @@ makeTerrainMesh rows cols height color' = do
         indices' = gridIndices (fromIntegral rows) (fromIntegral cols)
     mVertices <- Vec.unsafeThaw vertices
     calculateNormals mVertices indices'
-    vertices' <- normalizeNormals <$> Vec.unsafeFreeze mVertices
+    vertices' <- normalizeVectors <$> Vec.unsafeFreeze mVertices
     --writeFile "/tmp/vertices.txt" $ show vertices'
     buildFromVector StaticDraw vertices' indices'
 
@@ -81,30 +81,33 @@ calculateNormals vertices indices' = go 0
         go :: Int -> IO ()
         go index
             | index < Vec.length indices' = do
-                let i1 = fromIntegral (indices' ! index)
-                    i2 = fromIntegral (indices' ! (index + 1))
-                    i3 = fromIntegral (indices' ! (index + 2))
+                let i0 = fromIntegral (indices' ! index)
+                    i1 = fromIntegral (indices' ! (index + 1))
+                    i2 = fromIntegral (indices' ! (index + 2))
 
+                v0 <- MVec.read vertices i0
                 v1 <- MVec.read vertices i1
                 v2 <- MVec.read vertices i2
-                v3 <- MVec.read vertices i3
 
-                let vec1 = position v2 - position v1
-                    vec2 = position v3 - position v1
+                let vec1 = position v1 - position v0
+                    vec2 = position v2 - position v0
                     norm = normalize $ vec1 `cross` vec2
                 --print norm
 
+                MVec.write vertices i0 $ v0 {normal = norm + normal v0}
                 MVec.write vertices i1 $ v1 {normal = norm + normal v1}
                 MVec.write vertices i2 $ v2 {normal = norm + normal v2}
-                MVec.write vertices i3 $ v3 {normal = norm + normal v3}
 
                 go $ index + 3
 
             | otherwise = return ()
 
 
-normalizeNormals :: Vector Vertex -> Vector Vertex
-normalizeNormals = Vec.map (\v -> v {normal = normalize $ normal v})
+normalizeVectors :: Vector Vertex -> Vector Vertex
+normalizeVectors =
+    Vec.map (\v -> v { normal = normalize $ normal v
+                     , tangent = normalize $ tangent v}
+            )
 
 constHeight :: GLfloat -> Int -> Int -> GLfloat
 constHeight h _ _ = h
