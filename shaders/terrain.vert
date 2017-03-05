@@ -15,8 +15,8 @@ out vec2 vTexCoord;
 
 void main()
 {
-  vPosition = vec3(model * vec4(position, 1.0));
-  vNormal = vec3(model * vec4(normal, 0.0));
+  vPosition = (model * vec4(position, 1.0)).xyz;
+  vNormal = (model * vec4(normal, 0.0)).xyz;
   vColor = color;
   vTexCoord = texCoord;
 
