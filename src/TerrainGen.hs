@@ -28,7 +28,7 @@ makeTerrainMesh rows cols height color' = do
     let vertices = gridVertices rows cols height color'
         indices' = gridIndices (fromIntegral rows) (fromIntegral cols)
     mVertices <- Vec.unsafeThaw vertices
-    calculateNormals mVertices indices'
+    calculateVectors mVertices indices'
     vertices' <- normalizeVectors <$> Vec.unsafeFreeze mVertices
     --writeFile "/tmp/vertices.txt" $ show vertices'
     buildFromVector StaticDraw vertices' indices'
@@ -75,8 +75,8 @@ gridIndices rows cols =
                , myIndex + 1, myIndex + cols, myIndex + 1 + cols
                ]
 
-calculateNormals :: IOVector Vertex -> Vector GLuint -> IO ()
-calculateNormals vertices indices' = go 0
+calculateVectors :: IOVector Vertex -> Vector GLuint -> IO ()
+calculateVectors vertices indices' = go 0
     where
         go :: Int -> IO ()
         go index
@@ -89,19 +89,48 @@ calculateNormals vertices indices' = go 0
                 v1 <- MVec.read vertices i1
                 v2 <- MVec.read vertices i2
 
-                let vec1 = position v1 - position v0
-                    vec2 = position v2 - position v0
-                    norm = normalize $ vec1 `cross` vec2
-                --print norm
+                let edge1 = position v1 - position v0
+                    edge2 = position v2 - position v0
+                    deltaU1 = texCoord v1 `uSub` texCoord v0
+                    deltaV1 = texCoord v1 `vSub` texCoord v0
+                    deltaU2 = texCoord v2 `uSub` texCoord v0
+                    deltaV2 = texCoord v2 `vSub` texCoord v0
+                    f = 1.0 / (deltaU1 * deltaV2 - deltaU2 * deltaV1)
 
-                MVec.write vertices i0 $ v0 {normal = norm + normal v0}
-                MVec.write vertices i1 $ v1 {normal = norm + normal v1}
-                MVec.write vertices i2 $ v2 {normal = norm + normal v2}
+                    norm = normalize $ edge1 `cross` edge2
+                    tang = normalize $
+                        V3 (f * (deltaV2 * posX edge1 - deltaV1 * posX edge2))
+                           (f * (deltaV2 * posY edge1 - deltaV1 * posY edge2))
+                           (f * (deltaV2 * posZ edge1 - deltaV1 * posZ edge2))
+
+                MVec.write vertices i0 $ v0 { normal = norm + normal v0
+                                            , tangent = tang + tangent v0
+                                            }
+                MVec.write vertices i1 $ v1 { normal = norm + normal v1
+                                            , tangent = tang + tangent v1
+                                            }
+                MVec.write vertices i2 $ v2 { normal = norm + normal v2
+                                            , tangent = tang + tangent v2
+                                            }
 
                 go $ index + 3
 
             | otherwise = return ()
 
+uSub :: V2 GLfloat -> V2 GLfloat -> GLfloat
+uSub (V2 u1 _) (V2 u2 _) = u1 - u2
+
+vSub :: V2 GLfloat -> V2 GLfloat -> GLfloat
+vSub (V2 _ v1) (V2 _ v2) = v1 - v2
+
+posX :: V3 GLfloat -> GLfloat
+posX (V3 x _ _) = x
+
+posY :: V3 GLfloat -> GLfloat
+posY (V3 _ y _) = y
+
+posZ :: V3 GLfloat -> GLfloat
+posZ (V3 _ _ z) = z
 
 normalizeVectors :: Vector Vertex -> Vector Vertex
 normalizeVectors =
