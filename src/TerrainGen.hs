@@ -7,16 +7,17 @@ module TerrainGen
     , mapColor
     ) where
 
-import           Codec.Picture                       (Image (..), Pixel8,
-                                                      PixelRGB8 (..), pixelAt)
-import           Data.Vector.Storable                (Vector, (!))
-import qualified Data.Vector.Storable                as Vec
-import           Data.Vector.Storable.Mutable        (IOVector)
-import qualified Data.Vector.Storable.Mutable        as MVec
+import           Codec.Picture                           (Image (..), Pixel8,
+                                                          PixelRGB8 (..),
+                                                          pixelAt)
+import           Data.Vector.Storable                    (Vector, (!))
+import qualified Data.Vector.Storable                    as Vec
+import           Data.Vector.Storable.Mutable            (IOVector)
+import qualified Data.Vector.Storable.Mutable            as MVec
 import           Graphics.LWGL
-import           Graphics.LWGL.Vertex_P_Norm_Col_Tex (Vertex (..))
-import           Linear                              (V2 (..), V3 (..), cross,
-                                                      normalize)
+import           Graphics.LWGL.Vertex_P_Norm_Tan_Col_Tex (Vertex (..))
+import           Linear                                  (V2 (..), V3 (..),
+                                                          cross, normalize)
 
 
 type HeightGen = Int -> Int -> GLfloat
@@ -59,6 +60,7 @@ gridVertices rows cols height color' =
                                 (height row col)
                                 (fromIntegral row)
                 , normal = V3 0 0 0
+                , tangent = V3 0 0 0
                 , color = color' row col
                 , texCoord = V2 (fromIntegral col)
                                 (fromIntegral $ rows - (row + 1))
