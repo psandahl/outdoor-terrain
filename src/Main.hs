@@ -15,8 +15,8 @@ import qualified Graphics.UI.GLFW as GLFW
 import           Linear
 import           System.Exit      (exitFailure)
 
-import           Camera           (Camera (matrix, position), Navigation (..),
-                                   animate, initCamera, initNavigation)
+import           Camera           (Camera (matrix, position), animate,
+                                   initCamera, initNavigation)
 import           EventLoop        (eventLoop)
 import           Input            (initInput)
 import           RenderState      (RenderState (..))
@@ -93,16 +93,14 @@ main = do
                                          ( fromIntegral width / fromIntegral height )
                                          0.001 10000
             , camera = initCamera (V3 0 15 0) 0
-            , sunLight = sunLight'
             , navigation = initNavigation
+            , sunLight = sunLight'
             , timestamp = 0
             , frameDuration = 0
             , renderWireframe = False
             }
 
     ref <- newIORef renderState
-
-    --GLFW.setKeyCallback window $ Just (keyCallback ref)
 
     GL.glClearColor 0 0 0.4 0
     GL.glEnable CullFace
@@ -151,58 +149,6 @@ renderScene ref = do
 
     when (renderWireframe renderState) $
         GL.glPolygonMode FrontAndBack Fill
-
-keyCallback :: IORef RenderState -> Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
-keyCallback ref _ key _ keyState _ =
-    case key of
-        Key'Up    -> modifyIORef ref $ setForward (isActive keyState)
-        Key'Down  -> modifyIORef ref $ setBackward (isActive keyState)
-        Key'Left  -> modifyIORef ref $ setLeft (isActive keyState)
-        Key'Right -> modifyIORef ref $ setRight (isActive keyState)
-        Key'A     -> modifyIORef ref $ setUp (isActive keyState)
-        Key'Z     -> modifyIORef ref $ setDown (isActive keyState)
-        Key'F2    -> modifyIORef ref $ toggleWireframe (isActive keyState)
-        _         -> return ()
-
-isActive :: KeyState -> Bool
-isActive KeyState'Released = False
-isActive _                 = True
-
-setForward :: Bool -> RenderState -> RenderState
-setForward val renderState =
-    let nav  = navigation renderState
-    in renderState { navigation = nav { forward = val } }
-
-setBackward :: Bool -> RenderState -> RenderState
-setBackward val renderState =
-    let nav  = navigation renderState
-    in renderState { navigation = nav { backward = val } }
-
-setLeft :: Bool -> RenderState -> RenderState
-setLeft val renderState =
-    let nav  = navigation renderState
-    in renderState { navigation = nav { left = val } }
-
-setRight :: Bool -> RenderState -> RenderState
-setRight val renderState =
-    let nav  = navigation renderState
-    in renderState { navigation = nav { right = val } }
-
-setDown :: Bool -> RenderState -> RenderState
-setDown val renderState =
-    let nav = navigation renderState
-    in renderState { navigation = nav { down = val } }
-
-setUp :: Bool -> RenderState -> RenderState
-setUp val renderState =
-    let nav = navigation renderState
-    in renderState { navigation = nav { up = val } }
-
-toggleWireframe :: Bool -> RenderState -> RenderState
-toggleWireframe val renderState =
-    if val
-        then renderState { renderWireframe =  not (renderWireframe renderState) }
-        else renderState
 
 defaultWidth :: Int
 defaultWidth = 1280

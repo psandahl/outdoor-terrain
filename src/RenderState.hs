@@ -15,8 +15,8 @@ data RenderState = RenderState
     , terrain         :: !Terrain
     , perspectiveM    :: !(M44 GLfloat)
     , camera          :: !Camera
-    , sunLight        :: !SunLight
     , navigation      :: !Navigation
+    , sunLight        :: !SunLight
     , timestamp       :: !Double
     , frameDuration   :: !Double
     , renderWireframe :: !Bool

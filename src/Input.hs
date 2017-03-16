@@ -8,6 +8,7 @@ import           Graphics.UI.GLFW (Key (..), KeyState (..), ModifierKeys,
                                    Window)
 import qualified Graphics.UI.GLFW as GLFW
 
+import           Camera           (Navigation (..))
 import           RenderState      (RenderState (..))
 
 initInput :: Window -> IORef RenderState -> IO ()
@@ -22,3 +23,43 @@ keyCallback ref _window key _scan keyState _modKeys = do
     when (key == Key'R && keyState == KeyState'Pressed) $
         modifyIORef ref $ \state ->
             state { renderWireframe = not $ renderWireframe state }
+
+    -- Camera turning left.
+    when (key == Key'Left) $
+        modifyIORef ref $ \state ->
+            let nav = navigation state
+            in state { navigation = nav { left = activeKey keyState } }
+
+    -- Camera turning right.
+    when (key == Key'Right) $
+        modifyIORef ref $ \state ->
+            let nav = navigation state
+            in state { navigation = nav { right = activeKey keyState } }
+
+    -- Camera go forward.
+    when (key == Key'Up) $
+        modifyIORef ref $ \state ->
+            let nav = navigation state
+            in state { navigation = nav { forward = activeKey keyState } }
+
+    -- Camera go backward.
+    when (key == Key'Down) $
+        modifyIORef ref $ \state ->
+            let nav = navigation state
+            in state { navigation = nav { backward = activeKey keyState } }
+
+    -- Camera go up.
+    when (key == Key'A) $
+        modifyIORef ref $ \state ->
+            let nav = navigation state
+            in state { navigation = nav { up = activeKey keyState } }
+
+    -- Camera go down.
+    when (key == Key'Z) $
+        modifyIORef ref $ \state ->
+            let nav = navigation state
+            in state { navigation = nav { down = activeKey keyState } }
+
+activeKey :: KeyState -> Bool
+activeKey keyState =
+    keyState == KeyState'Pressed || keyState == KeyState'Repeating
