@@ -1,6 +1,6 @@
 module SkyBox
     ( SkyBox
-    , initSkyBox
+    , init
     , render
     ) where
 
@@ -12,6 +12,7 @@ import           Graphics.LWGL          (BufferUsage (..),
 import qualified Graphics.LWGL          as GL
 import           Graphics.LWGL.Vertex_P (Vertex (..))
 import           Linear                 (M44, V3 (..), (!*!))
+import           Prelude                hiding (init)
 
 import           Helpers                (makeTranslate)
 
@@ -21,8 +22,8 @@ data SkyBox = SkyBox
     , mesh        :: !Mesh
     } deriving Show
 
-initSkyBox :: IO (Either String SkyBox)
-initSkyBox = do
+init :: IO (Either String SkyBox)
+init = do
     eProgram <- GL.loadShaders [ (VertexShader, "shaders/skybox.vert")
                                , (FragmentShader, "shaders/skybox.frag")
                                ]

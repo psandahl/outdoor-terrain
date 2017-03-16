@@ -1,6 +1,6 @@
 module SunLight
     ( SunLight (..)
-    , initSun
+    , init
     , render
     ) where
 
@@ -12,6 +12,7 @@ import           Graphics.LWGL          (BufferUsage (..),
 import qualified Graphics.LWGL          as GL
 import           Graphics.LWGL.Vertex_P (Vertex (..), makeVertexArrayObject)
 import           Linear                 (M44, V3 (..), (!*!))
+import           Prelude                hiding (init)
 
 import           Helpers                (makeTranslate)
 
@@ -24,8 +25,8 @@ data SunLight = SunLight
     , sunColor      :: !(V3 GLfloat)
     } deriving Show
 
-initSun :: IO (Either String SunLight)
-initSun = do
+init :: IO (Either String SunLight)
+init = do
     eProgram <- GL.loadShaders [ (VertexShader, "shaders/sunlight.vert")
                                , (FragmentShader, "shaders/sunlight.frag")
                                ]

@@ -2,14 +2,12 @@ module Main where
 
 import           Control.Monad    (unless, when)
 import           Data.Either      (isLeft)
-import           Data.IORef       (IORef, modifyIORef, newIORef, readIORef,
-                                   writeIORef)
+import           Data.IORef       (IORef, newIORef, readIORef, writeIORef)
 import           Data.Maybe       (fromJust, isNothing)
 import           Graphics.LWGL    (ClearBufferMask (..), EnableCapability (..),
-                                   GLfloat, PolygonFace (..), PolygonMode (..))
+                                   PolygonFace (..), PolygonMode (..))
 import qualified Graphics.LWGL    as GL
-import           Graphics.UI.GLFW (Key (..), KeyState (..), ModifierKeys,
-                                   OpenGLProfile (..), StickyKeysInputMode (..),
+import           Graphics.UI.GLFW (OpenGLProfile (..), StickyKeysInputMode (..),
                                    VideoMode (..), Window, WindowHint (..))
 import qualified Graphics.UI.GLFW as GLFW
 import           Linear
@@ -20,11 +18,8 @@ import           Camera           (Camera (matrix, position), animate,
 import           EventLoop        (eventLoop)
 import           Input            (initInput)
 import           RenderState      (RenderState (..))
-import           SkyBox           (SkyBox, initSkyBox)
 import qualified SkyBox
-import           SunLight         (SunLight, initSun)
 import qualified SunLight
-import           Terrain          (Terrain, initTerrain)
 import qualified Terrain
 
 createGLContext :: Bool -> IO (Window, Int, Int)
@@ -59,7 +54,7 @@ main = do
     GLFW.makeContextCurrent (Just window)
     GLFW.setStickyKeysInputMode window StickyKeysInputMode'Enabled
 
-    eSkyBox <- initSkyBox
+    eSkyBox <- SkyBox.init
     when (isLeft eSkyBox) $ do
         let Left err = eSkyBox
         putStrLn err
@@ -68,7 +63,7 @@ main = do
 
     let Right skyBox' = eSkyBox
 
-    eTerrain <- initTerrain
+    eTerrain <- Terrain.init
     when (isLeft eTerrain) $ do
         let Left err = eTerrain
         putStrLn err
@@ -77,7 +72,7 @@ main = do
 
     let Right terrain' = eTerrain
 
-    eSunLight <- initSun
+    eSunLight <- SunLight.init
     when (isLeft eSunLight) $ do
         let Left err = eSunLight
         putStrLn err

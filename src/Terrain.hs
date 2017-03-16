@@ -1,6 +1,6 @@
 module Terrain
     ( Terrain
-    , initTerrain
+    , init
     , render
     ) where
 
@@ -10,6 +10,7 @@ import           Graphics.LWGL (EnableCapability (..), GLfloat, Location,
                                 TextureUnit (..), VertexArrayObject (..))
 import qualified Graphics.LWGL as GL
 import           Linear        (M44, V3 (..), (!*!))
+import           Prelude       hiding (init)
 
 import           Helpers       (makeTranslate)
 import           SunLight      (SunLight (sunColor, sunPosition))
@@ -30,8 +31,8 @@ data Terrain = Terrain
     , mesh            :: !Mesh
     } deriving Show
 
-initTerrain :: IO (Either String Terrain)
-initTerrain = do
+init :: IO (Either String Terrain)
+init = do
     eProgram <- GL.loadShaders [ (VertexShader, "shaders/terrain.vert")
                                , (FragmentShader, "shaders/terrain.frag")
                                ]
