@@ -22,6 +22,7 @@ executable outdoor-terrain-exe
                        Helpers
                        Terrain
                        TerrainGen
+                       RenderState
                        SkyBox
                        SunLight
   default-language:    Haskell2010

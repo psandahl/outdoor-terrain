@@ -18,23 +18,13 @@ import           System.Exit      (exitFailure)
 import           Camera           (Camera (matrix, position), Navigation (..),
                                    animate, initCamera, initNavigation)
 import           EventLoop        (eventLoop)
+import           RenderState      (RenderState (..))
 import           SkyBox           (SkyBox, initSkyBox)
 import qualified SkyBox
 import           SunLight         (SunLight, initSun)
 import qualified SunLight
 import           Terrain          (Terrain, initTerrain)
 import qualified Terrain
-
-data RenderState = RenderState
-    { skyBox          :: !SkyBox
-    , terrain         :: !Terrain
-    , perspectiveM    :: !(M44 GLfloat)
-    , camera          :: !Camera
-    , sunLight        :: !SunLight
-    , navigation      :: !Navigation
-    , lastTime        :: !Double
-    , renderWireframe :: !Bool
-    } deriving Show
 
 createGLContext :: Bool -> IO (Window, Int, Int)
 createGLContext fullScreen = do
