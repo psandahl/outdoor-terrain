@@ -18,6 +18,7 @@ import           System.Exit      (exitFailure)
 import           Camera           (Camera (matrix, position), Navigation (..),
                                    animate, initCamera, initNavigation)
 import           EventLoop        (eventLoop)
+import           Input            (initInput)
 import           RenderState      (RenderState (..))
 import           SkyBox           (SkyBox, initSkyBox)
 import qualified SkyBox
@@ -101,12 +102,14 @@ main = do
 
     ref <- newIORef renderState
 
-    GLFW.setKeyCallback window $ Just (keyCallback ref)
+    --GLFW.setKeyCallback window $ Just (keyCallback ref)
 
     GL.glClearColor 0 0 0.4 0
     GL.glEnable CullFace
     GL.glCullFace Back
     GL.glEnable ProgramPointSize
+
+    initInput window ref
 
     eventLoop window $ renderScene ref
 

@@ -20,6 +20,7 @@ executable outdoor-terrain-exe
                        DummyGen
                        EventLoop
                        Helpers
+                       Input
                        Terrain
                        TerrainGen
                        RenderState
