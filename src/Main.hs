@@ -84,8 +84,6 @@ main = do
         exitFailure
     let Right sunLight' = eSunLight
 
-    Just now <- GLFW.getTime
-
     let renderState =
           RenderState
             { skyBox = skyBox'
@@ -96,7 +94,8 @@ main = do
             , camera = initCamera (V3 0 15 0) 0
             , sunLight = sunLight'
             , navigation = initNavigation
-            , lastTime = now
+            , timestamp = 0
+            , frameDuration = 0
             , renderWireframe = False
             }
 
@@ -119,12 +118,15 @@ renderScene ref = do
 
     Just now <- GLFW.getTime
 
-    let duration = now - lastTime renderState
+    let duration = now - timestamp renderState
         camera'  = animate (navigation renderState) duration (camera renderState)
         view     = matrix camera'
 
     -- The updated camera and the new timestamp must be written to the state.
-    writeIORef ref renderState { camera = camera', lastTime = now }
+    writeIORef ref renderState { camera = camera'
+                               , timestamp = now
+                               , frameDuration = duration
+                               }
 
     -- Clear frame buffers.
     GL.glClear [ColorBuffer, DepthBuffer]

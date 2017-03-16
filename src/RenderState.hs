@@ -17,6 +17,7 @@ data RenderState = RenderState
     , camera          :: !Camera
     , sunLight        :: !SunLight
     , navigation      :: !Navigation
-    , lastTime        :: !Double
+    , timestamp       :: !Double
+    , frameDuration   :: !Double
     , renderWireframe :: !Bool
 } deriving Show
