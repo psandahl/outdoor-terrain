@@ -38,16 +38,14 @@ createGLContext fullScreen = do
     --GLFW.windowHint $ WindowHint'OpenGLDebugContext True
     GLFW.windowHint $ WindowHint'OpenGLProfile OpenGLProfile'Core
 
-    monitor <- if fullScreen then GLFW.getPrimaryMonitor
-                             else return Nothing
+    window <- if fullScreen then makeFullscreen else makeWindow
 
-    eWindow <- GLFW.createWindow defaultWidth defaultHeight "Outdoor terrain" monitor Nothing
-    when (isNothing eWindow) $ do
+    when (isNothing window) $ do
         putStrLn "Failed to create GLFW window"
         GLFW.terminate
         exitFailure
 
-    return (fromJust eWindow, defaultWidth, defaultHeight)
+    return $ fromJust window
 
 main :: IO ()
 main = do
@@ -144,6 +142,32 @@ renderScene ref = do
 
     when (renderWireframe renderState) $
         GL.glPolygonMode FrontAndBack Fill
+
+makeWindow :: IO (Maybe (Window, Int, Int))
+makeWindow = do
+    window <- GLFW.createWindow defaultWidth defaultHeight "Outdoor terrain" Nothing Nothing
+    case window of
+        Just window' -> return $ Just (window', defaultWidth, defaultHeight)
+        Nothing      -> return Nothing
+
+makeFullscreen :: IO (Maybe (Window, Int, Int))
+makeFullscreen = do
+    monitor <- GLFW.getPrimaryMonitor
+    case monitor of
+        Just monitor' -> do
+            mode <- GLFW.getVideoMode monitor'
+            case mode of
+                Just mode' -> do
+                    let w = videoModeWidth mode'
+                        h = videoModeHeight mode'
+                    window <- GLFW.createWindow w h "Outdoor terrain" (Just monitor') Nothing
+                    case window of
+                        Just window' -> return $ Just (window', w, h)
+                        Nothing      -> return Nothing
+
+                Nothing -> return Nothing
+
+        Nothing -> return Nothing
 
 defaultWidth :: Int
 defaultWidth = 1024
