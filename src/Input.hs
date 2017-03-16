@@ -4,16 +4,19 @@ module Input
 
 import           Control.Monad    (when)
 import           Data.IORef       (IORef, modifyIORef)
+import qualified Graphics.LWGL    as GL
 import           Graphics.UI.GLFW (Key (..), KeyState (..), ModifierKeys,
                                    Window)
 import qualified Graphics.UI.GLFW as GLFW
 
 import           Camera           (Navigation (..))
+import           Helpers          (makeProjection)
 import           RenderState      (RenderState (..))
 
 initInput :: Window -> IORef RenderState -> IO ()
 initInput window ref = do
     GLFW.setKeyCallback window $ Just (keyCallback ref)
+    GLFW.setWindowSizeCallback window $ Just (windowSizeCallback ref)
 
 keyCallback :: IORef RenderState -> Window -> Key -> Int
             -> KeyState -> ModifierKeys -> IO ()
@@ -63,3 +66,9 @@ keyCallback ref _window key _scan keyState _modKeys = do
 activeKey :: KeyState -> Bool
 activeKey keyState =
     keyState == KeyState'Pressed || keyState == KeyState'Repeating
+
+windowSizeCallback :: IORef RenderState -> Window -> Int -> Int -> IO ()
+windowSizeCallback ref _window width height = do
+    GL.glViewport 0 0 width height
+    modifyIORef ref $ \state ->
+        state { perspective = makeProjection width height}

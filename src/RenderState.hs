@@ -13,7 +13,7 @@ import           Terrain       (Terrain)
 data RenderState = RenderState
     { skyBox          :: !SkyBox
     , terrain         :: !Terrain
-    , perspectiveM    :: !(M44 GLfloat)
+    , perspective     :: !(M44 GLfloat)
     , camera          :: !Camera
     , navigation      :: !Navigation
     , sunLight        :: !SunLight

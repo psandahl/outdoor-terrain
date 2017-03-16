@@ -10,12 +10,13 @@ import qualified Graphics.LWGL    as GL
 import           Graphics.UI.GLFW (OpenGLProfile (..), StickyKeysInputMode (..),
                                    VideoMode (..), Window, WindowHint (..))
 import qualified Graphics.UI.GLFW as GLFW
-import           Linear
+import           Linear           (V3 (..))
 import           System.Exit      (exitFailure)
 
 import           Camera           (Camera (matrix, position), animate,
                                    initCamera, initNavigation)
 import           EventLoop        (eventLoop)
+import           Helpers          (makeProjection)
 import           Input            (initInput)
 import           RenderState      (RenderState (..))
 import qualified SkyBox
@@ -29,7 +30,7 @@ createGLContext fullScreen = do
         putStrLn "GLFW initialization failed"
         exitFailure
 
-    GLFW.windowHint $ WindowHint'Resizable False
+    GLFW.windowHint $ WindowHint'Resizable True
     GLFW.windowHint $ WindowHint'Samples 4
     GLFW.windowHint $ WindowHint'ContextVersionMajor 3
     GLFW.windowHint $ WindowHint'ContextVersionMinor 3
@@ -84,9 +85,7 @@ main = do
           RenderState
             { skyBox = skyBox'
             , terrain = terrain'
-            , perspectiveM = perspective (degToRad 45)
-                                         ( fromIntegral width / fromIntegral height )
-                                         0.001 10000
+            , perspective = makeProjection width height
             , camera = initCamera (V3 0 15 0) 0
             , navigation = initNavigation
             , sunLight = sunLight'
@@ -97,6 +96,7 @@ main = do
 
     ref <- newIORef renderState
 
+    GL.glViewport 0 0 width height
     GL.glClearColor 0 0 0.4 0
     GL.glEnable CullFace
     GL.glCullFace Back
@@ -128,17 +128,17 @@ renderScene ref = do
     GL.glClear [ColorBuffer, DepthBuffer]
 
     -- Render sky box.
-    SkyBox.render (perspectiveM renderState) view
+    SkyBox.render (perspective renderState) view
                   (position camera') (skyBox renderState)
 
     -- Render sun light.
-    SunLight.render (perspectiveM renderState) view (sunLight renderState)
+    SunLight.render (perspective renderState) view (sunLight renderState)
 
     -- Render terrain.
     when (renderWireframe renderState) $
         GL.glPolygonMode FrontAndBack Line
 
-    Terrain.render (perspectiveM renderState) view
+    Terrain.render (perspective renderState) view
                    (sunLight renderState) (position camera')
                    (terrain renderState)
 
@@ -146,10 +146,7 @@ renderScene ref = do
         GL.glPolygonMode FrontAndBack Fill
 
 defaultWidth :: Int
-defaultWidth = 1280
+defaultWidth = 1024
 
 defaultHeight :: Int
-defaultHeight = 960
-
-degToRad :: Float -> Float
-degToRad deg = deg * (pi / 180)
+defaultHeight = 768
