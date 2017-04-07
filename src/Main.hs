@@ -18,6 +18,7 @@ import           Camera           (Camera (matrix, position), animate,
 import           EventLoop        (eventLoop)
 import           Helpers          (makeProjection)
 import           Input            (initInput)
+import           Options          (Options (..), options)
 import           RenderState      (RenderState (..))
 import qualified SkyBox
 import qualified SunLight
@@ -49,7 +50,9 @@ createGLContext fullScreen = do
 
 main :: IO ()
 main = do
-    (window, width, height) <- createGLContext False
+    opts <- options
+
+    (window, width, height) <- createGLContext $ fullscreenMode opts
     GLFW.makeContextCurrent (Just window)
     GLFW.setStickyKeysInputMode window StickyKeysInputMode'Enabled
 

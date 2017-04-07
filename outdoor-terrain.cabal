@@ -21,6 +21,7 @@ executable outdoor-terrain-exe
                        EventLoop
                        Helpers
                        Input
+                       Options
                        Terrain
                        TerrainGen
                        RenderState
@@ -33,4 +34,5 @@ executable outdoor-terrain-exe
                      , JuicyPixels
                      , light-weight-opengl
                      , linear
+                     , optparse-applicative
                      , vector
